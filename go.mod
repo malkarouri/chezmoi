@@ -21,10 +21,11 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.3.3 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
+	github.com/muesli/combinator v0.3.0
 	github.com/muesli/termenv v0.7.2 // indirect
 	github.com/pelletier/go-toml v1.8.1
 	github.com/pkg/diff v0.0.0-20200914180035-5b29258ca4f7
-	github.com/rogpeppe/go-internal v1.6.2
+	github.com/rogpeppe/go-internal v1.6.3-0.20200916140020-85830ee3a953
 	github.com/sergi/go-diff v1.1.0
 	github.com/spf13/afero v1.4.0 // indirect
 	github.com/spf13/cobra v1.0.0
@@ -38,10 +39,12 @@ require (
 	github.com/twpayne/go-xdg/v3 v3.1.0
 	github.com/yuin/goldmark v1.2.1 // indirect
 	go.etcd.io/bbolt v1.3.5
+	go.uber.org/multierr v1.1.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73 // indirect
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sys v0.0.0-20200918174421-af09f7315aff
 	gopkg.in/ini.v1 v1.61.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
