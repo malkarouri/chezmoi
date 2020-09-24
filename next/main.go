@@ -1,3 +1,6 @@
+//go:generate go run . completion bash -o completions/chezmoi-completion.bash
+//go:generate go run . completion fish -o completions/chezmoi.fish
+//go:generate go run . completion zsh -o completions/chezmoi.zsh
 //go:generate go run ../internal/generate-assets -o cmd/docs.gen.go -tags=!noembeddocs -trimprefix=../ ../docs/CHANGES.md ../docs/CONTRIBUTING.md ../docs/FAQ.md ../docs/HOWTO.md ../docs/INSTALL.md ../docs/MEDIA.md ../docs/QUICKSTART.md ../docs/REFERENCE.md
 //go:generate go run ../internal/generate-assets -o cmd/templates.gen.go -trimprefix=../ ../assets/templates/COMMIT_MESSAGE.tmpl
 //go:generate go run ../internal/generate-helps -o cmd/helps.gen.go -i ../docs/REFERENCE.md

@@ -32,7 +32,8 @@ func init() {
 		"    [gpg]\n" +
 		"      recipient = \"...\"\n" +
 		"\n" +
-		"Support for the `gpgRecipient` config variable will be removed in version 2.0.0.\n")
+		"Support for the `gpgRecipient` config variable will be removed in version 2.0.0.\n" +
+		"\n")
 	assets["docs/CONTRIBUTING.md"] = []byte("" +
 		"# chezmoi Contributing Guide\n" +
 		"\n" +
@@ -139,14 +140,18 @@ func init() {
 		"\n" +
 		"Releases are managed with [`goreleaser`](https://goreleaser.com/).\n" +
 		"\n" +
-		"To create a new release, push a tag, e.g.:\n" +
-		"\n" +
-		"    git tag -a v0.1.0 -m \"First release\"\n" +
-		"    git push origin v0.1.0\n" +
-		"\n" +
-		"To build a test release, without publishing, run:\n" +
+		"To build a test release, without publishing, (Linux only) run:\n" +
 		"\n" +
 		"    make test-release\n" +
+		"\n" +
+		"To create a new release, create and push a tag, e.g.:\n" +
+		"\n" +
+		"    git tag v1.2.3\n" +
+		"    git push --tags\n" +
+		"\n" +
+		"[brew](https://brew.sh/) formula must be updated manually with the command:\n" +
+		"\n" +
+		"    brew bump-formula-pr --tag=v1.2.3 chezmoi\n" +
 		"\n" +
 		"## Packaging\n" +
 		"\n" +
@@ -233,7 +238,8 @@ func init() {
 		"    git push\n" +
 		"\n" +
 		"to push them. You can only push changes if you have write permissions to the\n" +
-		"chezmoi GitHub repo.\n")
+		"chezmoi GitHub repo.\n" +
+		"\n")
 	assets["docs/FAQ.md"] = []byte("" +
 		"# chezmoi Frequently Asked Questions\n" +
 		"\n" +
@@ -249,10 +255,11 @@ func init() {
 		"* [I've made changes to both the destination state and the source state that I want to keep. How can I keep them both?](#ive-made-changes-to-both-the-destination-state-and-the-source-state-that-i-want-to-keep-how-can-i-keep-them-both)\n" +
 		"* [Why does chezmoi convert all my template variables to lowercase?](#why-does-chezmoi-convert-all-my-template-variables-to-lowercase)\n" +
 		"* [chezmoi makes `~/.ssh/config` group writeable. How do I stop this?](#chezmoi-makes-sshconfig-group-writeable-how-do-i-stop-this)\n" +
-		"* [chezmoi's source file naming system cannot handle all possible filenames](#chezmois-source-file-naming-system-cannot-handle-all-possible-filenames)\n" +
+		"* [Can I change how chezmoi's source state is represented on disk?](#can-i-change-how-chezmois-source-state-is-represented-on-disk)\n" +
 		"* [gpg encryption fails. What could be wrong?](#gpg-encryption-fails-what-could-be-wrong)\n" +
 		"* [I'm getting errors trying to build chezmoi from source](#im-getting-errors-trying-to-build-chezmoi-from-source)\n" +
 		"* [What inspired chezmoi?](#what-inspired-chezmoi)\n" +
+		"* [Why not use Ansible/Chef/Puppet/Salt, or similar to manage my dotfiles instead?](#why-not-use-ansiblechefpuppetsalt-or-similar-to-manage-my-dotfiles-instead)\n" +
 		"* [Can I use chezmoi to manage files outside my home directory?](#can-i-use-chezmoi-to-manage-files-outside-my-home-directory)\n" +
 		"* [Where does the name \"chezmoi\" come from?](#where-does-the-name-chezmoi-come-from)\n" +
 		"* [What other questions have been asked about chezmoi?](#what-other-questions-have-been-asked-about-chezmoi)\n" +
@@ -285,11 +292,11 @@ func init() {
 		"## If there's a mechanism in place for the above, is there also a way to tell chezmoi to ignore specific files or groups of files (e.g. by directory name or by glob)?\n" +
 		"\n" +
 		"By default, chezmoi ignores everything that you haven't explicitly `chezmoi\n" +
-		"add`'ed. If have files in your source directory that you don't want added to\n" +
+		"add`'ed. If you have files in your source directory that you don't want added to\n" +
 		"your destination directory when you run `chezmoi apply` add their names to a\n" +
 		"file called `.chezmoiignore` in the source state.\n" +
 		"\n" +
-		"Patterns are supported, and the you can change what's ignored from machine to\n" +
+		"Patterns are supported, and you can change what's ignored from machine to\n" +
 		"machine. The full usage and syntax is described in the [reference\n" +
 		"manual](https://github.com/twpayne/chezmoi/blob/master/docs/REFERENCE.md#chezmoiignore).\n" +
 		"\n" +
@@ -369,18 +376,18 @@ func init() {
 		"This is due to a feature in\n" +
 		"[`github.com/spf13/viper`](https://github.com/spf13/viper), the library that\n" +
 		"chezmoi uses to read its configuration file. For more information see [this\n" +
-		"GitHub issue issue](https://github.com/twpayne/chezmoi/issues/463).\n" +
+		"GitHub issue](https://github.com/twpayne/chezmoi/issues/463).\n" +
 		"\n" +
 		"## chezmoi makes `~/.ssh/config` group writeable. How do I stop this?\n" +
 		"\n" +
 		"By default, chezmoi uses your system's umask when creating files. On most\n" +
-		"systems the default umask is `0o22` but some systems use `0o02`, which means\n" +
+		"systems the default umask is `0022` but some systems use `0002`, which means\n" +
 		"that files and directories are group writeable by default.\n" +
 		"\n" +
 		"You can override this for chezmoi by setting the `umask` configuration variable\n" +
 		"in your configuration file, for example:\n" +
 		"\n" +
-		"    umask = 0o22\n" +
+		"    umask = 0022\n" +
 		"\n" +
 		"Note that this will apply to all files and directories that chezmoi manages and\n" +
 		"will ensure that none of them are group writeable. It is not currently possible\n" +
@@ -389,23 +396,95 @@ func init() {
 		"GitHub](https://github.com/twpayne/chezmoi/issues/new?assignees=&labels=enhancement&template=02_feature_request.md&title=)\n" +
 		"if you need this.\n" +
 		"\n" +
-		"## chezmoi's source file naming system cannot handle all possible filenames\n" +
+		"## Can I change how chezmoi's source state is represented on disk?\n" +
 		"\n" +
-		"This is correct. Certain target filenames, for example `~/dot_example`, are\n" +
-		"incompatible with chezmoi's\n" +
+		"There are a number of criticisms of how chezmoi's source state is represented on\n" +
+		"disk:\n" +
+		"\n" +
+		"1. The source file naming system cannot handle all possible filenames.\n" +
+		"2. Not all possible file permissions can be represented.\n" +
+		"3. The long source file names are verbose.\n" +
+		"4. Everything is in a single directory, which can end up containing many entries.\n" +
+		"\n" +
+		"chezmoi's source state representation is a deliberate, practical compromise.\n" +
+		"\n" +
+		"Certain target filenames, for example `~/dot_example`, are incompatible with\n" +
+		"chezmoi's\n" +
 		"[attributes](https://github.com/twpayne/chezmoi/blob/master/docs/REFERENCE.md#source-state-attributes)\n" +
-		"used in the source state.\n" +
+		"used in the source state. In practice, dotfile filenames are unlikely to\n" +
+		"conflict with chezmoi's attributes. If this does cause a genuine problem for\n" +
+		"you, please [open an issue on\n" +
+		"GitHub](https://github.com/twpayne/chezmoi/issues/new/choose).\n" +
 		"\n" +
-		"This is a deliberate, practical compromise. Target state metadata (private,\n" +
-		"encrypted, etc.) need to be stored for each file. Using the source state\n" +
-		"filename for this means that the contents of the file are untouched, there is no\n" +
-		"need to maintain the metadata in a separate file, is independent of the\n" +
-		"underlying filesystem and version control system, and unambiguously associates\n" +
-		"the metadata with a single file.\n" +
+		"The `dot_` attribute makes it transparent which dotfiles are managed by chezmoi\n" +
+		"and which files are ignored by chezmoi. chezmoi ignores all files and\n" +
+		"directories that start with `.` so no special whitelists are needed for version\n" +
+		"control systems and their control files (e.g. `.git` and `.gitignore`).\n" +
 		"\n" +
-		"In practice, dotfile filenames are unlikely to conflict with chezmoi's\n" +
-		"attributes. If this does cause a genuine problem for you, please [open an\n" +
-		"issue on GitHub](https://github.com/twpayne/chezmoi/issues/new/choose).\n" +
+		"chezmoi needs per-file metadata to know how to interpret the source file's\n" +
+		"contents, for example to know when the source file is a template or if the\n" +
+		"file's contents are encrypted. By storing this metadata in the filename, the\n" +
+		"metadata is unambiguously associated with a single file and adding, updating, or\n" +
+		"removing a single file touches only a single file in the source state. Changes\n" +
+		"to the metadata (e.g. `chezmoi chattr +template *target*`) are simple file\n" +
+		"renames and isolated to the affected file.\n" +
+		"\n" +
+		"If chezmoi were to, say, use a common configuration file listing which files\n" +
+		"were templates and/or encrypted, then changes to any file would require updates\n" +
+		"to the common configuration file. Automating updates to configuration files\n" +
+		"requires a round trip (read config file, update config, write config) and it is\n" +
+		"not always possible preserve comments and formatting.\n" +
+		"\n" +
+		"chezmoi's attributes of `executable_` and `private_` only allow a the file\n" +
+		"permissions `0o644`, `0o755`, `0o600`, and `0o700` to be represented.\n" +
+		"Directories can only have permissions `0o755` or `0o700`. In practice, these\n" +
+		"cover all permissions typically used for dotfiles. If this does cause a genuine\n" +
+		"problem for you, please [open an issue on\n" +
+		"GitHub](https://github.com/twpayne/chezmoi/issues/new/choose).\n" +
+		"\n" +
+		"File permissions and modes like `executable_`, `private_`, and `symlink_` could\n" +
+		"also be stored in the filesystem, rather than in the filename. However, this\n" +
+		"requires the permissions to be preserved and handled by the underlying version\n" +
+		"control system and filesystem. chezmoi provides first-class support for Windows,\n" +
+		"where the `executable_` and `private_` attributes have no direct equivalents and\n" +
+		"symbolic links are not always permitted. Some version control systems do not\n" +
+		"preserve file permissions or handle symbolic links. By using regular files and\n" +
+		"directories, chezmoi avoids variations in the operating system, version control\n" +
+		"system, and filesystem making it both more robust and more portable.\n" +
+		"\n" +
+		"chezmoi uses a 1:1 mapping between entries in the source state and entries in\n" +
+		"the target state. This mapping is bi-directional and unambiguous.\n" +
+		"\n" +
+		"However, this also means that dotfiles that in the same directory in the target\n" +
+		"state must be in the same directory in the source state. In particular, every\n" +
+		"entry managed by chezmoi in the root of your home directory has a corresponding\n" +
+		"entry in the root of your source directory, which can mean that you end up with\n" +
+		"a lot of entries in the root of your source directory.\n" +
+		"\n" +
+		"If chezmoi were to permit, say, multiple separate source directories (so you\n" +
+		"could, say, put `dot_bashrc` in a `bash/` subdirectory, and `dot_vimrc` in a\n" +
+		"`vim/` subdirectory, but have `chezmoi apply` map these to `~/.bashrc` and\n" +
+		"`~/.vimrc` in the root of your home directory) then the mapping between source\n" +
+		"and target states is no longer bidirectional nor unambiguous, which\n" +
+		"significantly increases complexity and requires more user interaction. For\n" +
+		"example, if both `bash/dot_bashrc` and `vim/dot_bashrc` exist, what should be\n" +
+		"the contents of `~/.bashrc`? If you run `chezmoi add ~/.zshrc`, should\n" +
+		"`dot_zshrc` be stored in the source `bash/` directory, the source `vim/`\n" +
+		"directory, or somewhere else? How does the user communicate their preferences?\n" +
+		"\n" +
+		"chezmoi has many users and any changes to the source state representation must\n" +
+		"be backwards-compatible.\n" +
+		"\n" +
+		"In summary, chezmoi's source state representation is a compromise with both\n" +
+		"advantages and disadvantages. Changes to the representation will be considered,\n" +
+		"but must meet the following criteria, in order of importance:\n" +
+		"\n" +
+		"1. Be fully backwards-compatible for existing users.\n" +
+		"2. Fix a genuine problem encountered in practice.\n" +
+		"3. Be independent of the underlying operating system, version control system, and\n" +
+		"  filesystem.\n" +
+		"4. Not add significant extra complexity to the user interface or underlying\n" +
+		"   implementation.\n" +
 		"\n" +
 		"## gpg encryption fails. What could be wrong?\n" +
 		"\n" +
@@ -443,6 +522,25 @@ func init() {
 		"focus of chezmoi will always be personal home directory management. If your\n" +
 		"needs grow beyond that, switch to a whole system configuration management tool.\n" +
 		"\n" +
+		"## Why not use Ansible/Chef/Puppet/Salt, or similar to manage my dotfiles instead?\n" +
+		"\n" +
+		"Whole system management tools are more than capable of managing your dotfiles,\n" +
+		"but are large systems that entail several disadvantages. Compared to whole\n" +
+		"system management tools, chezmoi offers:\n" +
+		"\n" +
+		"* Small, focused feature set designed for dotfiles. There's simply less to learn\n" +
+		"  with chezmoi compared to whole system management tools.\n" +
+		"* Easy installation and execution on every platform, without root access.\n" +
+		"  Installing chezmoi requires only copying a single binary file with no external\n" +
+		"  dependencies. Executing chezmoi just involves running the binary. In contrast,\n" +
+		"  installing and running a whole system management tools typically requires\n" +
+		"  installing a scripting language runtime, several packages, and running a\n" +
+		"  system service, all typically requiring root access.\n" +
+		"\n" +
+		"chezmoi's focus and simple installation means that it runs almost everywhere:\n" +
+		"from tiny ARM-based Linux systems to Windows desktops, from inside lightweight\n" +
+		"containers to FreeBSD-based virtual machines in the cloud. \n" +
+		"\n" +
 		"## Can I use chezmoi to manage files outside my home directory?\n" +
 		"\n" +
 		"In practice, yes, you can, but this is strongly discouraged beyond using your\n" +
@@ -473,7 +571,7 @@ func init() {
 		"\n" +
 		"If your needs extend beyond modifying a handful of files outside your target\n" +
 		"system, then existing configuration management tools like\n" +
-		"[Puppet](https://puppet.com/), [Chef](https://www.chef.io/chef/),\n" +
+		"[Puppet](https://puppet.com/), [Chef](https://chef.io/),\n" +
 		"[Ansible](https://www.ansible.com/), and [Salt](https://www.saltstack.com/) are\n" +
 		"much better suited - and of course can be called from a chezmoi `run_` script.\n" +
 		"Put your Puppet Manifests, Chef Recipes, Ansible Modules, and Salt Modules in a\n" +
@@ -523,12 +621,12 @@ func init() {
 		"* [Ensure that a target is removed](#ensure-that-a-target-is-removed)\n" +
 		"* [Include a subdirectory from another repository, like Oh My Zsh](#include-a-subdirectory-from-another-repository-like-oh-my-zsh)\n" +
 		"* [Handle configuration files which are externally modified](#handle-configuration-files-which-are-externally-modified)\n" +
+		"* [Handle different file locations on different systems with the same contents](#handle-different-file-locations-on-different-systems-with-the-same-contents)\n" +
 		"* [Keep data private](#keep-data-private)\n" +
 		"  * [Use Bitwarden to keep your secrets](#use-bitwarden-to-keep-your-secrets)\n" +
 		"  * [Use gopass to keep your secrets](#use-gopass-to-keep-your-secrets)\n" +
 		"  * [Use gpg to keep your secrets](#use-gpg-to-keep-your-secrets)\n" +
 		"  * [Use KeePassXC to keep your secrets](#use-keepassxc-to-keep-your-secrets)\n" +
-		"  * [Use a keyring to keep your secrets](#use-a-keyring-to-keep-your-secrets)\n" +
 		"  * [Use LastPass to keep your secrets](#use-lastpass-to-keep-your-secrets)\n" +
 		"  * [Use 1Password to keep your secrets](#use-1password-to-keep-your-secrets)\n" +
 		"  * [Use pass to keep your secrets](#use-pass-to-keep-your-secrets)\n" +
@@ -538,6 +636,9 @@ func init() {
 		"* [Use scripts to perform actions](#use-scripts-to-perform-actions)\n" +
 		"  * [Understand how scripts work](#understand-how-scripts-work)\n" +
 		"  * [Install packages with scripts](#install-packages-with-scripts)\n" +
+		"* [Use chezmoi with GitHub Codespaces, Visual Studio Codespaces, Visual Studio Code Remote - Containers](#use-chezmoi-with-github-codespaces-visual-studio-codespaces-visual-studio-code-remote---containers)\n" +
+		"* [Detect Windows Services for Linux (WSL)](#detect-windows-services-for-linux-wsl)\n" +
+		"* [Run a PowerShell script as admin on Windows](#run-a-powershell-script-as-admin-on-windows)\n" +
 		"* [Import archives](#import-archives)\n" +
 		"* [Export archives](#export-archives)\n" +
 		"* [Use a non-git version control system](#use-a-non-git-version-control-system)\n" +
@@ -720,8 +821,8 @@ func init() {
 		"certain machines. If you want an empty file to be created anyway, you will need\n" +
 		"to give it an `empty_` prefix.\n" +
 		"\n" +
-		"For coarser-grained control of files and entire directories are managed on\n" +
-		"different machines, or to exclude certain files completely, you can create\n" +
+		"For coarser-grained control of files and entire directories managed on different\n" +
+		"machines, or to exclude certain files completely, you can create\n" +
 		"`.chezmoiignore` files in the source directory. These specify a list of patterns\n" +
 		"that chezmoi should ignore, and are interpreted as templates. An example\n" +
 		"`.chezmoiignore` file might look like:\n" +
@@ -730,6 +831,11 @@ func init() {
 		"    {{- if ne .chezmoi.hostname \"work-laptop\" }}\n" +
 		"    .work # only manage .work on work-laptop\n" +
 		"    {{- end }}\n" +
+		"\n" +
+		"The use of `ne` (not equal) is deliberate. What we want to achieve is \"only\n" +
+		"install `.work` if hostname is `work-laptop`\" but chezmoi installs everything by\n" +
+		"default, so we have to turn the logic around and instead write \"ignore `.work`\n" +
+		"unless the hostname is `work-laptop`\".\n" +
 		"\n" +
 		"Patterns can be excluded by prefixing them with a `!`, for example:\n" +
 		"\n" +
@@ -901,6 +1007,33 @@ func init() {
 		"Now, when the program modifies its configuration file it will modify the file in\n" +
 		"the source state instead.\n" +
 		"\n" +
+		"## Handle different file locations on different systems with the same contents\n" +
+		"\n" +
+		"If you want to have the same file contents in different locations on different\n" +
+		"systems, but maintain only a single file in your source state, you can use\n" +
+		"a shared template.\n" +
+		"\n" +
+		"Create the common file in the `.chezmoitemplates` directory in the source state. For\n" +
+		"example, create `.chezmoitemplates/file.conf`. The contents of this file are\n" +
+		"available in templates with the `template *name*` function where *name* is the\n" +
+		"name of the file.\n" +
+		"\n" +
+		"Then create files for each system, for example `Library/Application\n" +
+		"Support/App/file.conf.tmpl` for macOS and `dot_config/app/file.conf.tmpl` for\n" +
+		"Linux. Both template files should contain `{{- template \"file.conf\" -}}`.\n" +
+		"\n" +
+		"Finally, tell chezmoi to ignore files where they are not needed by adding lines\n" +
+		"to your `.chezmoiignore` file, for example:\n" +
+		"\n" +
+		"```\n" +
+		"{{ if ne .chezmoi.os \"darwin\" }}\n" +
+		"Library/Application Support/App/file.conf\n" +
+		"{{ end }}\n" +
+		"{{ if ne .chezmoi.os \"linux\" }}\n" +
+		".config/app/file.conf\n" +
+		"{{ end }}\n" +
+		"```\n" +
+		"\n" +
 		"## Keep data private\n" +
 		"\n" +
 		"chezmoi automatically detects when files and directories are private when adding\n" +
@@ -1017,35 +1150,6 @@ func init() {
 		"\n" +
 		"    {{ keepassxcAttribute \"SSH Key\" \"private-key\" }}\n" +
 		"\n" +
-		"### Use a keyring to keep your secrets\n" +
-		"\n" +
-		"chezmoi includes support for Keychain (on macOS), GNOME Keyring (on Linux), and\n" +
-		"Windows Credentials Manager (on Windows) via the\n" +
-		"[`zalando/go-keyring`](https://github.com/zalando/go-keyring) library.\n" +
-		"\n" +
-		"Set passwords with:\n" +
-		"\n" +
-		"    $ chezmoi keyring set --service=<service> --user=<user>\n" +
-		"    Password: xxxxxxxx\n" +
-		"\n" +
-		"The password can then be used in templates using the `keyring` function which\n" +
-		"takes the service and user as arguments.\n" +
-		"\n" +
-		"For example, save a GitHub access token in keyring with:\n" +
-		"\n" +
-		"    $ chezmoi keyring set --service=github --user=<github-username>\n" +
-		"    Password: xxxxxxxx\n" +
-		"\n" +
-		"and then include it in your `~/.gitconfig` file with:\n" +
-		"\n" +
-		"    [github]\n" +
-		"      user = \"{{ .github.user }}\"\n" +
-		"      token = \"{{ keyring \"github\" .github.user }}\"\n" +
-		"\n" +
-		"You can query the keyring from the command line:\n" +
-		"\n" +
-		"    chezmoi keyring get --service=github --user=<github-username>\n" +
-		"\n" +
 		"### Use LastPass to keep your secrets\n" +
 		"\n" +
 		"chezmoi includes support for [LastPass](https://lastpass.com) using the\n" +
@@ -1109,6 +1213,11 @@ func init() {
 		"Then you can access `details.password` with the syntax:\n" +
 		"\n" +
 		"    {{ (onepassword \"<uuid>\").details.password }}\n" +
+		"\n" +
+		"Login details fields can be retrieved with the `onepasswordDetailsFields`\n" +
+		"function, for example:\n" +
+		"\n" +
+		"    {{- (onepasswordDetailsFields \"uuid\").password.value }}\n" +
 		"\n" +
 		"Documents can be retrieved with:\n" +
 		"\n" +
@@ -1245,6 +1354,146 @@ func init() {
 		"\n" +
 		"This will install `ripgrep` on both Debian/Ubuntu Linux systems and macOS.\n" +
 		"\n" +
+		"## Use chezmoi with GitHub Codespaces, Visual Studio Codespaces, Visual Studio Code Remote - Containers\n" +
+		"\n" +
+		"The following assumes you are using chezmoi 1.8.4 or later. It does not work\n" +
+		"with earlier versions of chezmoi.\n" +
+		"\n" +
+		"You can use chezmoi to manage your dotfiles in [GitHub\n" +
+		"Codespaces](https://docs.github.com/en/github/developing-online-with-codespaces/personalizing-codespaces-for-your-account),\n" +
+		"[Visual Studio\n" +
+		"Codespaces](https://docs.microsoft.com/en/visualstudio/codespaces/reference/personalizing),\n" +
+		"and [Visual Studio Code Remote -\n" +
+		"Containers](https://code.visualstudio.com/docs/remote/containers#_personalizing-with-dotfile-repositories).\n" +
+		"\n" +
+		"For a quick start, you can clone the [`chezmoi/dotfiles`\n" +
+		"repository](https://github.com/chezmoi/dotfiles) which supports Codespaces out\n" +
+		"of the box.\n" +
+		"\n" +
+		"The workflow is different to using chezmoi on a new machine, notably:\n" +
+		"* These systems will automatically clone your `dotfiles` repo to `~/dotfiles`,\n" +
+		"  so there is no need to clone your repo yourself.\n" +
+		"* The installation script must be non-interactive.\n" +
+		"* When running in a Codespace, the environment variable `CODESPACES` will be set\n" +
+		"  to `true`. You can read its value with the [`env` template\n" +
+		"  function](http://masterminds.github.io/sprig/os.html).\n" +
+		"\n" +
+		"First, if you are using a chezmoi configuration file template, ensure that it is\n" +
+		"non-interactive when running in codespaces, for example, `.chezmoi.toml.tmpl`\n" +
+		"might contain:\n" +
+		"\n" +
+		"```\n" +
+		"{{- $codespaces:= env \"CODESPACES\" | not | not -}}\n" +
+		"sourceDir = \"{{ .chezmoi.sourceDir }}\"\n" +
+		"\n" +
+		"[data]\n" +
+		"  name = \"Your name\"\n" +
+		"  codespaces = {{ $codespaces }}\n" +
+		"{{- if $codespaces }}{{/* Codespaces dotfiles setup is non-interactive, so set an email address */}}\n" +
+		"  email = \"your@email.com\"\n" +
+		"{{- else }}{{/* Interactive setup, so prompt for an email address */}}\n" +
+		"  email = \"{{ promptString \"email\" }}\"\n" +
+		"{{- end }}\n" +
+		"```\n" +
+		"\n" +
+		"This sets the `codespaces` template variable, so you don't have to repeat `(env\n" +
+		"\"CODESPACES\")` in your templates. It also sets the `sourceDir` configuration to\n" +
+		"the `--source` argument passed in `chezmoi init`.\n" +
+		"\n" +
+		"Second, create an `install.sh` script that installs chezmoi and your dotfiles:\n" +
+		"\n" +
+		"```sh\n" +
+		"#!/bin/sh\n" +
+		"\n" +
+		"set -e # -e: exit on error\n" +
+		"\n" +
+		"if [ ! \"$(command -v chezmoi)\" ]; then\n" +
+		"  bin_dir=\"$HOME/.local/bin\"\n" +
+		"  chezmoi=\"$bin_dir/chezmoi\"\n" +
+		"  if [ \"$(command -v curl)\" ]; then\n" +
+		"    sh -c \"$(curl -fsSL https://git.io/chezmoi)\" -- -b \"$bin_dir\"\n" +
+		"  elif [ \"$(command -v wget)\" ]; then\n" +
+		"    sh -c \"$(wget -qO- https://git.io/chezmoi)\" -- -b \"$bin_dir\"\n" +
+		"  else\n" +
+		"    echo \"To install chezmoi, you must have curl or wget installed.\" >&2\n" +
+		"    exit 1\n" +
+		"  fi\n" +
+		"else\n" +
+		"  chezmoi=chezmoi\n" +
+		"fi\n" +
+		"\n" +
+		"# POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188\n" +
+		"script_dir=\"$(cd -P -- \"$(dirname -- \"$(command -v -- \"$0\")\")\" && pwd -P)\"\n" +
+		"# exec: replace current process with chezmoi init\n" +
+		"exec \"$chezmoi\" init --apply \"--source=$script_dir\"\n" +
+		"```\n" +
+		"\n" +
+		"Ensure that this file is executable (`chmod a+x install.sh`), and add\n" +
+		"`install.sh` to your `.chezmoiignore` file.\n" +
+		"\n" +
+		"It installs the latest version of chezmoi in `~/.local/bin` if needed, and then\n" +
+		"`chezmoi init ...` invokes chezmoi to create its configuration file and\n" +
+		"initialize your dotfiles. `--apply` tells chezmoi to apply the changes\n" +
+		"immediately, and `--source=...` tells chezmoi where to find the cloned\n" +
+		"`dotfiles` repo, which in this case is the same folder in which the script is\n" +
+		"running from.\n" +
+		"\n" +
+		"If you do not use a chezmoi configuration file template you can use `chezmoi\n" +
+		"apply --source=$HOME/dotfiles` instead of `chezmoi init ...` in `install.sh`.\n" +
+		"\n" +
+		"Finally, modify any of your templates to use the `codespaces` variable if\n" +
+		"needed. For example, to install `vim-gtk` on Linux but not in Codespaces, your\n" +
+		"`run_once_install-packages.sh.tmpl` might contain:\n" +
+		"\n" +
+		"```\n" +
+		"{{- if (and (eq .chezmoi.os \"linux\")) (not .codespaces))) -}}\n" +
+		"#!/bin/sh\n" +
+		"sudo apt install -y vim-gtk\n" +
+		"{{- end -}}\n" +
+		"```\n" +
+		"\n" +
+		"## Detect Windows Services for Linux (WSL)\n" +
+		"\n" +
+		"WSL can be detected by looking for the string `Microsoft` in\n" +
+		"`/proc/kernel/osrelease`, which is available in the template variable\n" +
+		"`.chezmoi.kernel.osrelease`, for example:\n" +
+		"\n" +
+		"WSL 1:\n" +
+		"```\n" +
+		"{{ if (contains \"Microsoft\" .chezmoi.kernel.osrelease) }}\n" +
+		"# WSL-specific code\n" +
+		"{{ end }}\n" +
+		"```\n" +
+		"\n" +
+		"WSL 2:\n" +
+		"```\n" +
+		"{{ if (contains \"microsoft\" .chezmoi.kernel.osrelease) }}\n" +
+		"# WSL-specific code\n" +
+		"{{ end }}\n" +
+		"```\n" +
+		"\n" +
+		"WSL 2 since version 4.19.112:\n" +
+		"```\n" +
+		"{{ if (contains \"microsoft-WSL2\" .chezmoi.kernel.osrelease) }}\n" +
+		"# WSL-specific code\n" +
+		"{{ end }}\n" +
+		"```\n" +
+		"\n" +
+		"## Run a PowerShell script as admin on Windows\n" +
+		"\n" +
+		"Put the following at the top of your script:\n" +
+		"\n" +
+		"```powershell\n" +
+		"# Self-elevate the script if required\n" +
+		"if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {\n" +
+		"  if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {\n" +
+		"    $CommandLine = \"-NoExit -File `\"\" + $MyInvocation.MyCommand.Path + \"`\" \" + $MyInvocation.UnboundArguments\n" +
+		"    Start-Process -FilePath PowerShell.exe -Verb Runas -ArgumentList $CommandLine\n" +
+		"    Exit\n" +
+		"  }\n" +
+		"}\n" +
+		"```\n" +
+		"\n" +
 		"## Import archives\n" +
 		"\n" +
 		"It is occasionally useful to import entire archives of configuration into your\n" +
@@ -1314,7 +1563,7 @@ func init() {
 		"Many dotfile managers replace dotfiles with symbolic links to files in a common\n" +
 		"directory. If you `chezmoi add` such a symlink, chezmoi will add the symlink,\n" +
 		"not the file. To assist with migrating from symlink-based systems, use the\n" +
-		"`--follow` / `-f` option to `chezmoi add`, for example:\n" +
+		"`--follow` option to `chezmoi add`, for example:\n" +
 		"\n" +
 		"    chezmoi add --follow ~/.bashrc\n" +
 		"\n" +
@@ -1352,9 +1601,12 @@ func init() {
 		"| Linux        | Linuxbrew  | `brew install chezmoi`                                                                      |\n" +
 		"| Alpine Linux | apk        | `apk add chezmoi`                                                                           |\n" +
 		"| Arch Linux   | pacman     | `pacman -S chezmoi`                                                                         |\n" +
+		"| Guix Linux   | guix       | `guix install chezmoi`                                                                      |\n" +
 		"| NixOS Linux  | nix-env    | `nix-env -i chezmoi`                                                                        |\n" +
 		"| macOS        | Homebrew   | `brew install chezmoi`                                                                      |\n" +
+		"| macOS        | MacPorts   | `sudo port install chezmoi`                                                                 |\n" +
 		"| Windows      | Scoop      | `scoop bucket add twpayne https://github.com/twpayne/scoop-bucket && scoop install chezmoi` |\n" +
+		"| Windows      | Chocolatey | `choco install chezmoi`                                                                     |\n" +
 		"\n" +
 		"## Pre-built Linux packages\n" +
 		"\n" +
@@ -1412,18 +1664,25 @@ func init() {
 		"\n" +
 		"<!--- toc --->\n" +
 		"\n" +
-		"| Date       | Version | Format       | Link                                                                                                                      |\n" +
-		"| ---------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------------- |\n" +
-		"| 2020-04-16 | 1.17.19 | Text (FR)    | [Chezmoi, visite guidée](https://blog.wescale.fr/2020/04/16/chezmoi-visite-guidee/)                                       |\n" +
-		"| 2020-04-03 | 1.7.17  | Text         | [Fedora Magazine: Take back your dotfiles with Chezmoi](https://fedoramagazine.org/take-back-your-dotfiles-with-chezmoi/) |\n" +
-		"| 2020-03-12 | 1.7.16  | Video        | [Managing Dotfiles with ChezMoi](https://www.youtube.com/watch?v=HXx6ugA98Qo)                                             |\n" +
-		"| 2019-11-20 | 1.7.2   | Audio/video  | [FLOSS weekly episode 556: chezmoi](https://twit.tv/shows/floss-weekly/episodes/556)                                      |\n" +
-		"| 2019-01-10 | 0.0.11  | Text         | [Linux Fu: The kitchen sync](https://hackaday.com/2019/01/10/linux-fu-the-kitchen-sync/)                                  |\n" +
+		"| Date       | Version | Format      | Link                                                                                                                                                            |\n" +
+		"| ---------- | ------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n" +
+		"| 2020-08-09 | 1.8.3   | Text        | [Automating and testing dotfiles](https://seds.nl/posts/automating-and-testing-dotfiles/)                                                                       |\n" +
+		"| 2020-07-06 | 1.8.3   | Video       | [chezmoi: Manage your dotfiles across multiple machines, securely](https://www.youtube.com/watch?v=JrCMCdvoMAw).                                                |\n" +
+		"| 2020-07-03 | 1.8.3   | Text        | [Feeling at home in a LXD container](https://ubuntu.com/blog/feeling-at-home-in-a-lxd-container)                                                                |\n" +
+		"| 2020-06-15 | 1.8.2   | Text        | [Dotfiles management using chezmoi - How I Use Linux Desktop at Work Part5](https://blog.benoitj.ca/2020-06-15-how-i-use-linux-desktop-at-work-part5-dotfiles/) |\n" +
+		"| 2020-04-27 | 1.8.0   | Text        | [Managing my dotfiles with chezmoi](http://blog.emilieschario.com/post/managing-my-dotfiles-with-chezmoi/)                                                      |\n" +
+		"| 2020-04-16 | 1.17.19 | Text (FR)   | [Chezmoi, visite guidée](https://blog.wescale.fr/2020/04/16/chezmoi-visite-guidee/)                                                                             |\n" +
+		"| 2020-04-03 | 1.7.17  | Text        | [Fedora Magazine: Take back your dotfiles with Chezmoi](https://fedoramagazine.org/take-back-your-dotfiles-with-chezmoi/)                                       |\n" +
+		"| 2020-04-01 | 1.7.17  | Text        | [Managing dotfiles and secret with chezmoi](https://blog.arkey.fr/2020/04/01/manage_dotfiles_with_chezmoi/)                                                     |\n" +
+		"| 2020-03-12 | 1.7.16  | Video       | [Managing Dotfiles with ChezMoi](https://www.youtube.com/watch?v=HXx6ugA98Qo)                                                                                   |\n" +
+		"| 2019-11-20 | 1.7.2   | Audio/video | [FLOSS weekly episode 556: chezmoi](https://twit.tv/shows/floss-weekly/episodes/556)                                                                            |\n" +
+		"| 2019-01-10 | 0.0.11  | Text        | [Linux Fu: The kitchen sync](https://hackaday.com/2019/01/10/linux-fu-the-kitchen-sync/)                                                                        |\n" +
 		"\n" +
 		"To add your article to this page please either [open an\n" +
 		"issue](https://github.com/twpayne/chezmoi/issues/new/choose) or submit a pull\n" +
 		"request that modifies this file\n" +
-		"([`docs/MEDIA.md`](https://github.com/twpayne/chezmoi/blob/master/docs/MEDIA.md)).\n")
+		"([`docs/MEDIA.md`](https://github.com/twpayne/chezmoi/blob/master/docs/MEDIA.md)).\n" +
+		"\n")
 	assets["docs/QUICKSTART.md"] = []byte("" +
 		"# chezmoi Quick Start Guide\n" +
 		"\n" +
@@ -1454,7 +1713,8 @@ func init() {
 		"\n" +
 		"    chezmoi add ~/.bashrc\n" +
 		"\n" +
-		"This will copy `~/.bashrc` to `~/.local/share/chezmoi/dot_bashrc`.\n" +
+		"This will copy `~/.bashrc` to `~/.local/share/chezmoi/dot_bashrc`. If you want\n" +
+		"to add a whole folder to chezmoi, you have to add the `-r` argument after `add`.\n" +
 		"\n" +
 		"Edit the source state:\n" +
 		"\n" +
@@ -1524,7 +1784,7 @@ func init() {
 		"  * [`-c`, `--config` *filename*](#-c---config-filename)\n" +
 		"  * [`--debug`](#--debug)\n" +
 		"  * [`-D`, `--destination` *directory*](#-d---destination-directory)\n" +
-		"  * [`-f`, `--follow`](#-f---follow)\n" +
+		"  * [`--follow`](#--follow)\n" +
 		"  * [`-n`, `--dry-run`](#-n---dry-run)\n" +
 		"  * [`-h`, `--help`](#-h---help)\n" +
 		"  * [`-r`. `--remove`](#-r---remove)\n" +
@@ -1532,7 +1792,8 @@ func init() {
 		"  * [`-v`, `--verbose`](#-v---verbose)\n" +
 		"  * [`--version`](#--version)\n" +
 		"* [Configuration file](#configuration-file)\n" +
-		"  * [Configuration variables](#configuration-variables)\n" +
+		"  * [Variables](#variables)\n" +
+		"  * [Examples](#examples)\n" +
 		"* [Source state attributes](#source-state-attributes)\n" +
 		"* [Special files and directories](#special-files-and-directories)\n" +
 		"  * [`.chezmoi.<format>.tmpl`](#chezmoiformattmpl)\n" +
@@ -1544,7 +1805,7 @@ func init() {
 		"  * [`add` *targets*](#add-targets)\n" +
 		"  * [`apply` [*targets*]](#apply-targets)\n" +
 		"  * [`archive`](#archive)\n" +
-		"  * [`cat` targets](#cat-targets)\n" +
+		"  * [`cat` *targets*](#cat-targets)\n" +
 		"  * [`cd`](#cd)\n" +
 		"  * [`chattr` *attributes* *targets*](#chattr-attributes-targets)\n" +
 		"  * [`completion` *shell*](#completion-shell)\n" +
@@ -1583,17 +1844,21 @@ func init() {
 		"* [Template functions](#template-functions)\n" +
 		"  * [`bitwarden` [*args*]](#bitwarden-args)\n" +
 		"  * [`gopass` *gopass-name*](#gopass-gopass-name)\n" +
+		"  * [`include` *filename*](#include-filename)\n" +
+		"  * [`joinPath` *elements*](#joinpath-elements)\n" +
 		"  * [`keepassxc` *entry*](#keepassxc-entry)\n" +
 		"  * [`keepassxcAttribute` *entry* *attribute*](#keepassxcattribute-entry-attribute)\n" +
-		"  * [`keyring` *service* *user*](#keyring-service-user)\n" +
 		"  * [`lastpass` *id*](#lastpass-id)\n" +
 		"  * [`lastpassRaw` *id*](#lastpassraw-id)\n" +
-		"  * [`onepassword` *uuid*](#onepassword-uuid)\n" +
-		"  * [`onepasswordDocument` *uuid*](#onepassworddocument-uuid)\n" +
+		"  * [`lookPath` *file*](#lookpath-file)\n" +
+		"  * [`onepassword` *uuid* [*vault-uuid*]](#onepassword-uuid-vault-uuid)\n" +
+		"  * [`onepasswordDocument` *uuid* [*vault-uuid*]](#onepassworddocument-uuid-vault-uuid)\n" +
+		"  * [`onepasswordDetailsFields` *uuid* [*vault-uuid*]](#onepassworddetailsfields-uuid-vault-uuid)\n" +
 		"  * [`pass` *pass-name*](#pass-pass-name)\n" +
 		"  * [`promptString` *prompt*](#promptstring-prompt)\n" +
 		"  * [`secret` [*args*]](#secret-args)\n" +
 		"  * [`secretJSON` [*args*]](#secretjson-args)\n" +
+		"  * [`stat` *name*](#stat-name)\n" +
 		"  * [`vault` *key*](#vault-key)\n" +
 		"\n" +
 		"## Concepts\n" +
@@ -1614,8 +1879,8 @@ func init() {
 		"\n" +
 		"* A *target* is a file, directory, or symlink in the destination directory.\n" +
 		"\n" +
-		"* The *destination state* is the state of all the targets in the destination\n" +
-		"  directory.\n" +
+		"* The *destination state* is the current state of all the targets in the\n" +
+		"  destination directory.\n" +
 		"\n" +
 		"* The *config file* contains machine-specific configuration, by default it is\n" +
 		"  `~/.config/chezmoi/chezmoi.toml`.\n" +
@@ -1644,7 +1909,7 @@ func init() {
 		"\n" +
 		"Use *directory* as the destination directory.\n" +
 		"\n" +
-		"### `-f`, `--follow`\n" +
+		"### `--follow`\n" +
 		"\n" +
 		"If the last part of a target is a symlink, deal with what the symlink\n" +
 		"references, rather than the symlink itself.\n" +
@@ -1689,44 +1954,73 @@ func init() {
 		"property file format, and [HCL](https://github.com/hashicorp/hcl). The basename\n" +
 		"of the config file is `chezmoi`, and the first config file found is used.\n" +
 		"\n" +
-		"### Configuration variables\n" +
+		"### Variables\n" +
 		"\n" +
 		"The following configuration variables are available:\n" +
 		"\n" +
-		"| Variable                | Type     | Default value             | Description                                         |\n" +
-		"| ----------------------- | -------- | ------------------------- | --------------------------------------------------- |\n" +
-		"| `bitwarden.command`     | string   | `bw`                      | Bitwarden CLI command                               |\n" +
-		"| `cd.args`               | []string | *none*                    | Extra args to shell in `cd` command                 |\n" +
-		"| `cd.command`            | string   | *none*                    | Shell to run in `cd` command                        |\n" +
-		"| `color`                 | string   | `auto`                    | Colorize diffs                                      |\n" +
-		"| `data`                  | any      | *none*                    | Template data                                       |\n" +
-		"| `destDir`               | string   | `~`                       | Destination directory                               |\n" +
-		"| `diff.format`           | string   | `chezmoi`                 | Diff format, either `chezmoi` or `git`              |\n" +
-		"| `diff.pager`            | string   | *none*                    | Pager                                               |\n" +
-		"| `dryRun`                | bool     | `false`                   | Dry run mode                                        |\n" +
-		"| `follow`                | bool     | `false`                   | Follow symlinks                                     |\n" +
-		"| `genericSecret.command` | string   | *none*                    | Generic secret command                              |\n" +
-		"| `gopass.command`        | string   | `gopass`                  | gopass CLI command                                  |\n" +
-		"| `gpg.command`           | string   | `gpg`                     | GPG CLI command                                     |\n" +
-		"| `gpg.recipient`         | string   | *none*                    | GPG recipient                                       |\n" +
-		"| `gpg.symmetric`         | bool     | `false`                   | Use symmetric GPG encryption                        |\n" +
-		"| `keepassxc.args`        | []string | *none*                    | Extra args to KeePassXC CLI command                 |\n" +
-		"| `keepassxc.command`     | string   | `keepassxc-cli`           | KeePassXC CLI command                               |\n" +
-		"| `keepassxc.database`    | string   | *none*                    | KeePassXC database                                  |\n" +
-		"| `lastpass.command`      | string   | `lpass`                   | Lastpass CLI command                                |\n" +
-		"| `merge.args`            | []string | *none*                    | Extra args to 3-way merge command                   |\n" +
-		"| `merge.command`         | string   | `vimdiff`                 | 3-way merge command                                 |\n" +
-		"| `onepassword.command`   | string   | `op`                      | 1Password CLI command                               |\n" +
-		"| `pass.command`          | string   | `pass`                    | Pass CLI command                                    |\n" +
-		"| `remove`                | bool     | `false`                   | Remove targets                                      |\n" +
-		"| `sourceDir`             | string   | `~/.local/share/chezmoi`  | Source directory                                    |\n" +
-		"| `sourceVCS.autoCommit`  | bool     | `false`                   | Commit changes to the source state after any change |\n" +
-		"| `sourceVCS.autoPush`    | bool     | `false`                   | Push changes to the source state after any change   |\n" +
-		"| `sourceVCS.command`     | string   | `git`                     | Source version control system                       |\n" +
-		"| `template.options`      | []string | `[\"missingkey=error\"]`    | Template options                                    |\n" +
-		"| `umask`                 | int      | *from system*             | Umask                                               |\n" +
-		"| `vault.command`         | string   | `vault`                   | Vault CLI command                                   |\n" +
-		"| `verbose`               | bool     | `false`                   | Verbose mode                                        |\n" +
+		"| Section         | Variable     | Type     | Default value             | Description                                         |\n" +
+		"| --------------- | ------------ | -------- | ------------------------- | --------------------------------------------------- |\n" +
+		"| Top level       | `color`      | string   | `auto`                    | Colorize diffs                                      |\n" +
+		"|                 | `data`       | any      | *none*                    | Template data                                       |\n" +
+		"|                 | `destDir`    | string   | `~`                       | Destination directory                               |\n" +
+		"|                 | `dryRun`     | bool     | `false`                   | Dry run mode                                        |\n" +
+		"|                 | `follow`     | bool     | `false`                   | Follow symlinks                                     |\n" +
+		"|                 | `remove`     | bool     | `false`                   | Remove targets                                      |\n" +
+		"|                 | `sourceDir`  | string   | `~/.local/share/chezmoi`  | Source directory                                    |\n" +
+		"|                 | `umask`      | int      | *from system*             | Umask                                               |\n" +
+		"|                 | `verbose`    | bool     | `false`                   | Verbose mode                                        |\n" +
+		"| `bitwarden`     | `command`    | string   | `bw`                      | Bitwarden CLI command                               |\n" +
+		"| `cd`            | `args`       | []string | *none*                    | Extra args to shell in `cd` command                 |\n" +
+		"|                 | `command`    | string   | *none*                    | Shell to run in `cd` command                        |\n" +
+		"| `diff`          | `format`     | string   | `chezmoi`                 | Diff format, either `chezmoi` or `git`              |\n" +
+		"|                 | `pager`      | string   | *none*                    | Pager                                               |\n" +
+		"| `genericSecret` | `command`    | string   | *none*                    | Generic secret command                              |\n" +
+		"| `gopass`        | `command`    | string   | `gopass`                  | gopass CLI command                                  |\n" +
+		"| `gpg`           | `command`    | string   | `gpg`                     | GPG CLI command                                     |\n" +
+		"|                 | `recipient`  | string   | *none*                    | GPG recipient                                       |\n" +
+		"|                 | `symmetric`  | bool     | `false`                   | Use symmetric GPG encryption                        |\n" +
+		"| `keepassxc`     | `args`       | []string | *none*                    | Extra args to KeePassXC CLI command                 |\n" +
+		"|                 | `command`    | string   | `keepassxc-cli`           | KeePassXC CLI command                               |\n" +
+		"|                 | `database`   | string   | *none*                    | KeePassXC database                                  |\n" +
+		"| `lastpass`      | `command`    | string   | `lpass`                   | Lastpass CLI command                                |\n" +
+		"| `merge`         | `args`       | []string | *none*                    | Extra args to 3-way merge command                   |\n" +
+		"|                 | `command`    | string   | `vimdiff`                 | 3-way merge command                                 |\n" +
+		"| `onepassword`   | `command`    | string   | `op`                      | 1Password CLI command                               |\n" +
+		"| `pass`          | `command`    | string   | `pass`                    | Pass CLI command                                    |\n" +
+		"| `sourceVCS`     | `autoCommit` | bool     | `false`                   | Commit changes to the source state after any change |\n" +
+		"|                 | `autoPush`   | bool     | `false`                   | Push changes to the source state after any change   |\n" +
+		"|                 | `command`    | string   | `git`                     | Source version control system                       |\n" +
+		"| `template`      | `options`    | []string | `[\"missingkey=error\"]`    | Template options                                    |\n" +
+		"| `vault`         | `command`    | string   | `vault`                   | Vault CLI command                                   |\n" +
+		"\n" +
+		"### Examples\n" +
+		"\n" +
+		"#### JSON\n" +
+		"\n" +
+		"```json\n" +
+		"{\n" +
+		"    \"sourceDir\": \"/home/user/.dotfiles\",\n" +
+		"    \"diff\": {\n" +
+		"        \"format\": \"git\"\n" +
+		"    }\n" +
+		"}\n" +
+		"```\n" +
+		"\n" +
+		"#### TOML\n" +
+		"\n" +
+		"```toml\n" +
+		"sourceDir = \"/home/user/.dotfiles\"\n" +
+		"[diff]\n" +
+		"    format = \"git\"\n" +
+		"```\n" +
+		"\n" +
+		"#### YAML\n" +
+		"\n" +
+		"```yaml\n" +
+		"sourceDir: /home/user/.dotfiles\n" +
+		"diff:\n" +
+		"    format: git\n" +
+		"```\n" +
 		"\n" +
 		"## Source state attributes\n" +
 		"\n" +
@@ -1807,6 +2101,7 @@ func init() {
 		"\n" +
 		"    *.txt   # ignore *.txt in the target directory\n" +
 		"    */*.txt # ignore *.txt in subdirectories of the target directory\n" +
+		"    backups/** # ignore backups folder in chezmoi directory and all its contents\n" +
 		"\n" +
 		"    {{- if ne .email \"john.smith@company.com\" }}\n" +
 		"    # Ignore .company-directory unless configured with a company email\n" +
@@ -1925,7 +2220,7 @@ func init() {
 		"    chezmoi archive | tar tvf -\n" +
 		"    chezmoi archive --output=dotfiles.tar\n" +
 		"\n" +
-		"### `cat` targets\n" +
+		"### `cat` *targets*\n" +
 		"\n" +
 		"Write the target state of *targets*  to stdout. *targets* must be files or\n" +
 		"symlinks. For files, the target file contents are written. For symlinks, the\n" +
@@ -2166,12 +2461,22 @@ func init() {
 		"### `init` [*repo*]\n" +
 		"\n" +
 		"Setup the source directory and update the destination directory to match the\n" +
-		"target state. If *repo* is given then it is checked out into the source\n" +
-		"directory, otherwise a new repository is initialized in the source directory. If\n" +
-		"a file called `.chezmoi.format.tmpl` exists, where `format` is one of the\n" +
-		"supported file formats (e.g. `json`, `toml`, or `yaml`) then a new configuration\n" +
-		"file is created using that file as a template. Finally, if the `--apply` flag is\n" +
-		"passed, `chezmoi apply` is run.\n" +
+		"target state.\n" +
+		"\n" +
+		"First, if the source directory is not already contain a repository, then if\n" +
+		"*repo* is given it is checked out into the source directory, otherwise a new\n" +
+		"repository is initialized in the source directory.\n" +
+		"\n" +
+		"Second, if a file called `.chezmoi.format.tmpl` exists, where `format` is one of\n" +
+		"the supported file formats (e.g. `json`, `toml`, or `yaml`) then a new\n" +
+		"configuration file is created using that file as a template.\n" +
+		"\n" +
+		"Finally, if the `--apply` flag is passed, `chezmoi apply` is run.\n" +
+		"\n" +
+		"#### `--apply`\n" +
+		"\n" +
+		"Run `chezmoi apply` after checking out the repo and creating the config file.\n" +
+		"This is `false` by default.\n" +
 		"\n" +
 		"#### `init` examples\n" +
 		"\n" +
@@ -2285,8 +2590,6 @@ func init() {
 		"#### `secret` examples\n" +
 		"\n" +
 		"    chezmoi secret bitwarden list items\n" +
-		"    chezmoi secret keyring set --service service --user user\n" +
-		"    chezmoi secret keyring get --service service --user user\n" +
 		"    chezmoi secret lastpass ls\n" +
 		"    chezmoi secret lastpass -- show --format=json id\n" +
 		"    chezmoi secret onepassword list items\n" +
@@ -2467,6 +2770,23 @@ func init() {
 		"\n" +
 		"    {{ gopass \"<pass-name>\" }}\n" +
 		"\n" +
+		"### `include` *filename*\n" +
+		"\n" +
+		"`include` returns the literal contents of the file named `*filename*`, relative\n" +
+		"to the source directory.\n" +
+		"\n" +
+		"### `joinPath` *elements*\n" +
+		"\n" +
+		"`joinPath` joins any number of path elements into a single path, separating them\n" +
+		"with the OS-specific path separator. Empty elements are ignored. The result is\n" +
+		"cleaned. If the argument list is empty or all its elements are empty, `joinPath`\n" +
+		"returns an empty string. On Windows, the result will only be a UNC path if the\n" +
+		"first non-empty element is a UNC path.\n" +
+		"\n" +
+		"#### `joinPath` examples\n" +
+		"\n" +
+		"    {{ joinPath .chezmoi.homedir \".zshrc\" }}\n" +
+		"\n" +
 		"### `keepassxc` *entry*\n" +
 		"\n" +
 		"`keepassxc` returns structured data retrieved from a\n" +
@@ -2495,22 +2815,6 @@ func init() {
 		"\n" +
 		"    {{ keepassxcAttribute \"SSH Key\" \"private-key\" }}\n" +
 		"\n" +
-		"### `keyring` *service* *user*\n" +
-		"\n" +
-		"`keyring` retrieves the password associated with *service* and *user* from the\n" +
-		"user's keyring.\n" +
-		"\n" +
-		"| OS    | Keyring       |\n" +
-		"| ----- | ------------- |\n" +
-		"| macOS | Keychain      |\n" +
-		"| Linux | GNOME Keyring |\n" +
-		"\n" +
-		"#### `keyring` examples\n" +
-		"\n" +
-		"    [github]\n" +
-		"      user = \"{{ .github.user }}\"\n" +
-		"      token = \"{{ keyring \"github\" .github.user }}\"\n" +
-		"\n" +
 		"### `lastpass` *id*\n" +
 		"\n" +
 		"`lastpass` returns structured data from [LastPass](https://lastpass.com) using\n" +
@@ -2538,31 +2842,114 @@ func init() {
 		"\n" +
 		"    {{ (index (lastpassRaw \"SSH Private Key\") 0).note }}\n" +
 		"\n" +
-		"### `onepassword` *uuid*\n" +
+		"### `lookPath` *file*\n" +
+		"\n" +
+		"`lookPath` searches for an executable named *file* in the directories named by\n" +
+		"the `PATH` environment variable. If file contains a slash, it is tried directly\n" +
+		"and the `PATH `is not consulted. The result may be an absolute path or a path\n" +
+		"relative to the current directory. If *file* is not found, `lookPath` returns an\n" +
+		"empty string.\n" +
+		"\n" +
+		"`lookPath` is not hermetic: its return value depends on the state of the\n" +
+		"environment and the filesystem at the moment the template is executed. Exercise\n" +
+		"caution when using it in your templates.\n" +
+		"\n" +
+		"#### `lookPath` examples\n" +
+		"\n" +
+		"    {{ if lookPath \"diff-so-fancy\" }}\n" +
+		"    # diff-so-fancy is in $PATH\n" +
+		"    {{ end }}\n" +
+		"\n" +
+		"### `onepassword` *uuid* [*vault-uuid*]\n" +
 		"\n" +
 		"`onepassword` returns structured data from [1Password](https://1password.com/)\n" +
 		"using the [1Password\n" +
 		"CLI](https://support.1password.com/command-line-getting-started/) (`op`). *uuid*\n" +
 		"is passed to `op get item <uuid>` and the output from `op` is parsed as JSON.\n" +
 		"The output from `op` is cached so calling `onepassword` multiple times with the\n" +
-		"same *uuid* will only invoke `op` once.\n" +
+		"same *uuid* will only invoke `op` once.  If the optional *vault-uuid* is supplied,\n" +
+		"it will be passed along to the `op get` call, which can significantly improve\n" +
+		"performance.\n" +
 		"\n" +
 		"#### `onepassword` examples\n" +
 		"\n" +
 		"    {{ (onepassword \"<uuid>\").details.password }}\n" +
+		"    {{ (onepassword \"<uuid>\" \"<vault-uuid>\").details.password }}\n" +
 		"\n" +
-		"### `onepasswordDocument` *uuid*\n" +
+		"### `onepasswordDocument` *uuid* [*vault-uuid*]\n" +
 		"\n" +
 		"`onepassword` returns a document from [1Password](https://1password.com/)\n" +
 		"using the [1Password\n" +
 		"CLI](https://support.1password.com/command-line-getting-started/) (`op`). *uuid*\n" +
 		"is passed to `op get document <uuid>` and the output from `op` is returned.\n" +
 		"The output from `op` is cached so calling `onepasswordDocument` multiple times with the\n" +
-		"same *uuid* will only invoke `op` once.\n" +
+		"same *uuid* will only invoke `op` once.  If the optional *vault-uuid* is supplied,\n" +
+		"it will be passed along to the `op get` call, which can significantly improve\n" +
+		"performance.\n" +
 		"\n" +
 		"#### `onepasswordDocument` examples\n" +
 		"\n" +
 		"    {{- onepasswordDocument \"<uuid>\" -}}\n" +
+		"    {{- onepasswordDocument \"<uuid>\" \"<vault-uuid>\" -}}\n" +
+		"\n" +
+		"### `onepasswordDetailsFields` *uuid* [*vault-uuid*]\n" +
+		"\n" +
+		"`onepasswordDetailsFields` returns structured data from\n" +
+		"[1Password](https://1password.com/) using the [1Password\n" +
+		"CLI](https://support.1password.com/command-line-getting-started/) (`op`). *uuid*\n" +
+		"is passed to `op get item <uuid>`, the output from `op` is parsed as JSON, and\n" +
+		"elements of `details.fields` are returned as a map indexed by each field's\n" +
+		"`designation`. For example, give the output from `op`:\n" +
+		"\n" +
+		"```json\n" +
+		"{\n" +
+		"  \"uuid\": \"<uuid>\",\n" +
+		"  \"details\": {\n" +
+		"    \"fields\": [\n" +
+		"      {\n" +
+		"        \"designation\": \"username\",\n" +
+		"        \"name\": \"username\",\n" +
+		"        \"type\": \"T\",\n" +
+		"        \"value\": \"exampleuser\"\n" +
+		"      },\n" +
+		"      {\n" +
+		"        \"designation\": \"password\",\n" +
+		"        \"name\": \"password\",\n" +
+		"        \"type\": \"P\",\n" +
+		"        \"value\": \"examplepassword\"\n" +
+		"      }\n" +
+		"    ],\n" +
+		"  }\n" +
+		"}\n" +
+		"```\n" +
+		"\n" +
+		"the return value will be the map:\n" +
+		"\n" +
+		"```json\n" +
+		"{\n" +
+		"  \"username\": {\n" +
+		"    \"designation\": \"username\",\n" +
+		"    \"name\": \"username\",\n" +
+		"    \"type\": \"T\",\n" +
+		"    \"value\": \"exampleuser\"\n" +
+		"  },\n" +
+		"  \"password\": {\n" +
+		"    \"designation\": \"password\",\n" +
+		"    \"name\": \"password\",\n" +
+		"    \"type\": \"P\",\n" +
+		"    \"value\": \"examplepassword\"\n" +
+		"  }\n" +
+		"}\n" +
+		"```\n" +
+		"\n" +
+		"The output from `op` is cached so calling `onepassword` multiple times with the\n" +
+		"same *uuid* will only invoke `op` once.  If the optional *vault-uuid* is supplied,\n" +
+		"it will be passed along to the `op get` call, which can significantly improve\n" +
+		"performance.\n" +
+		"\n" +
+		"#### `onepasswordDetailsFields` examples\n" +
+		"\n" +
+		"    {{ (onepasswordDetailsFields \"<uuid>\").password.value }}\n" +
 		"\n" +
 		"### `pass` *pass-name*\n" +
 		"\n" +
@@ -2602,6 +2989,24 @@ func init() {
 		"parsed as JSON. The output is cached so multiple calls to `secret` with the same\n" +
 		"*args* will only invoke the generic secret command once.\n" +
 		"\n" +
+		"### `stat` *name*\n" +
+		"\n" +
+		"`stat` runs `stat(2)` on *name*. If *name* exists it returns structured data. If\n" +
+		"*name* does not exist then it returns a falsey value. If `stat(2)` returns any\n" +
+		"other error then it raises an error. The structured value returned if *name*\n" +
+		"exists contains the fields `name`, `size`, `mode`, `perm`, `modTime`, and\n" +
+		"`isDir`.\n" +
+		"\n" +
+		"`stat` is not hermetic: its return value depends on the state of the filesystem\n" +
+		"at the moment the template is executed. Exercise caution when using it in your\n" +
+		"templates.\n" +
+		"\n" +
+		"#### `stat` examples\n" +
+		"\n" +
+		"    {{ if stat (joinPath .chezmoi.homedir \".pyenv\") }}\n" +
+		"    # ~/.pyenv exists\n" +
+		"    {{ end }}\n" +
+		"\n" +
 		"### `vault` *key*\n" +
 		"\n" +
 		"`vault` returns structured data from [Vault](https://www.vaultproject.io/) using\n" +
@@ -2612,5 +3017,6 @@ func init() {
 		"\n" +
 		"#### `vault` examples\n" +
 		"\n" +
-		"    {{ (vault \"<key>\").data.data.password }}\n")
+		"    {{ (vault \"<key>\").data.data.password }}\n" +
+		"\n")
 }
