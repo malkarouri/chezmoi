@@ -29,12 +29,6 @@ func (s *DryRunSystem) Chmod(name string, mode os.FileMode) error {
 	return nil
 }
 
-// Delete implements System.Delete.
-func (s *DryRunSystem) Delete(bucket, key []byte) error {
-	s.modified = true
-	return nil
-}
-
 // Glob implements System.Glob.
 func (s *DryRunSystem) Glob(pattern string) ([]string, error) {
 	return s.s.Glob(pattern)
