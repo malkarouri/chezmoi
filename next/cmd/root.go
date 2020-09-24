@@ -102,6 +102,8 @@ func (c *Config) newRootCmd() (*cobra.Command, error) {
 		}
 	})
 
+	rootCmd.AddCommand(c.newCompletionCmd(rootCmd))
+	rootCmd.SetHelpCommand(c.newHelpCmd(rootCmd))
 	for _, newCmdFunc := range []func() *cobra.Command{
 		c.newAddCmd,
 		c.newApplyCmd,
@@ -109,7 +111,6 @@ func (c *Config) newRootCmd() (*cobra.Command, error) {
 		c.newCatCmd,
 		c.newCDCmd,
 		c.newChattrCmd,
-		func() *cobra.Command { return c.newCompletionCmd(rootCmd) },
 		c.newDataCmd,
 		c.newDiffCmd,
 		c.newDocsCmd,
@@ -135,7 +136,6 @@ func (c *Config) newRootCmd() (*cobra.Command, error) {
 	} {
 		rootCmd.AddCommand(newCmdFunc())
 	}
-	rootCmd.SetHelpCommand(c.newHelpCmd(rootCmd))
 
 	return rootCmd, nil
 }
