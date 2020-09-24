@@ -81,6 +81,8 @@ func (c *Config) newRootCmd() (*cobra.Command, error) {
 		}
 	}
 
+	// FIXME this shouldn't be global
+	// FIXME move it to c.persistentPreRunRootE
 	cobra.OnInitialize(func() {
 		v := viper.New()
 		v.SetConfigFile(c.configFile)
