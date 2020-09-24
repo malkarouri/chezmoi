@@ -99,10 +99,9 @@ type Config struct {
 	absSourceDir string
 	absDestDir   string
 
-	scriptStateBucket []byte
-	stdin             io.Reader
-	stdout            io.Writer
-	stderr            io.Writer
+	stdin  io.Reader
+	stdout io.Writer
+	stderr io.Writer
 }
 
 // A configOption sets and option on a Config.
@@ -247,10 +246,9 @@ func newConfig(options ...configOption) (*Config, error) {
 			include:   chezmoi.NewIncludeSet(chezmoi.IncludeAll &^ chezmoi.IncludeScripts),
 			recursive: true,
 		},
-		scriptStateBucket: []byte("script"),
-		stdin:             os.Stdin,
-		stdout:            os.Stdout,
-		stderr:            os.Stderr,
+		stdin:  os.Stdin,
+		stdout: os.Stdout,
+		stderr: os.Stderr,
 	}
 
 	for key, value := range map[string]interface{}{
@@ -399,7 +397,7 @@ func (c *Config) getDestPath(arg osPath) (string, error) {
 		return "", err
 	}
 	if !strings.HasPrefix(path, c.absDestDir+"/") {
-		return "", fmt.Errorf("%s: not in destination directory (%s)", arg, c.absDestDir)
+		return "", fmt.Errorf("%s: not in destination directory (%s)", arg, c.absDestDir) // FIXME
 	}
 	return path, nil
 }

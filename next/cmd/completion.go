@@ -28,7 +28,7 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 		}
 	}
 
-	bashCompletionCmd := &cobra.Command{
+	bashCmd := &cobra.Command{
 		Use:   "bash",
 		Args:  cobra.NoArgs,
 		Short: "Generate bash completion code",
@@ -37,9 +37,9 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 			doesNotRequireValidConfig: "true",
 		},
 	}
-	completionCmd.AddCommand(bashCompletionCmd)
+	completionCmd.AddCommand(bashCmd)
 
-	fishCompletionCmd := &cobra.Command{
+	fishCmd := &cobra.Command{
 		Use:   "fish",
 		Args:  cobra.NoArgs,
 		Short: "Generate fish completion code",
@@ -50,9 +50,9 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 			doesNotRequireValidConfig: "true",
 		},
 	}
-	completionCmd.AddCommand(fishCompletionCmd)
+	completionCmd.AddCommand(fishCmd)
 
-	powerShellCompletionCmd := &cobra.Command{
+	powerShellCmd := &cobra.Command{
 		Use:   "powershell",
 		Args:  cobra.NoArgs,
 		Short: "Generate PowerShell completion code",
@@ -61,9 +61,9 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 			doesNotRequireValidConfig: "true",
 		},
 	}
-	completionCmd.AddCommand(powerShellCompletionCmd)
+	completionCmd.AddCommand(powerShellCmd)
 
-	zshCompletionCmd := &cobra.Command{
+	zshCmd := &cobra.Command{
 		Use:   "zsh",
 		Args:  cobra.NoArgs,
 		Short: "Generate zsh completion code",
@@ -72,7 +72,7 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 			doesNotRequireValidConfig: "true",
 		},
 	}
-	completionCmd.AddCommand(zshCompletionCmd)
+	completionCmd.AddCommand(zshCmd)
 
 	return completionCmd
 }

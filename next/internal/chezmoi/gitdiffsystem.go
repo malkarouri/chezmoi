@@ -69,16 +69,6 @@ func (s *GitDiffSystem) Chmod(name string, mode os.FileMode) error {
 	return s.s.Chmod(name, mode)
 }
 
-// Delete implements System.Delete.
-func (s *GitDiffSystem) Delete(bucket, key []byte) error {
-	return s.s.Delete(bucket, key)
-}
-
-// Get implements System.Get.
-func (s *GitDiffSystem) Get(bucket, key []byte) ([]byte, error) {
-	return s.s.Get(bucket, key)
-}
-
 // Glob implements System.Glob.
 func (s *GitDiffSystem) Glob(pattern string) ([]string, error) {
 	return s.s.Glob(pattern)
@@ -114,6 +104,11 @@ func (s *GitDiffSystem) Mkdir(name string, perm os.FileMode) error {
 		return err
 	}
 	return s.s.Mkdir(name, perm)
+}
+
+// PersistentState implements System.PersistentState.
+func (s *GitDiffSystem) PersistentState() PersistentState {
+	return s.s.PersistentState()
 }
 
 // RawPath implements System.RawPath.
@@ -222,11 +217,6 @@ func (s *GitDiffSystem) Rename(oldpath, newpath string) error {
 		return err
 	}
 	return s.s.Rename(oldpath, newpath)
-}
-
-// Set implements System.Set.
-func (s *GitDiffSystem) Set(bucket, key, value []byte) error {
-	return s.s.Set(bucket, key, value)
 }
 
 // UnderlyingFS implements System.UnderlyingFS.

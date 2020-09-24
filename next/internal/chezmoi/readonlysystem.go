@@ -9,29 +9,21 @@ import (
 
 // A ReadOnlySystem is a system that may only be read from.
 type ReadOnlySystem struct {
-	s System
+	s  System
+	ps PersistentState
 }
 
 // NewReadOnlySystem returns a new ReadOnlySystem that wraps system.
 func NewReadOnlySystem(system System) *ReadOnlySystem {
 	return &ReadOnlySystem{
-		s: system,
+		s:  system,
+		ps: newReadOnlyPersistentState(system.PersistentState()),
 	}
 }
 
 // Chmod implements System.Chmod.
 func (s *ReadOnlySystem) Chmod(name string, perm os.FileMode) error {
 	return os.ErrPermission
-}
-
-// Delete implements System.Delete.
-func (s *ReadOnlySystem) Delete(bucket, key []byte) error {
-	return os.ErrPermission
-}
-
-// Get implements System.Get.
-func (s *ReadOnlySystem) Get(bucket, key []byte) ([]byte, error) {
-	return s.s.Get(bucket, key)
 }
 
 // Glob implements System.Glob.
@@ -52,6 +44,11 @@ func (s *ReadOnlySystem) Lstat(filename string) (os.FileInfo, error) {
 // Mkdir implements System.Mkdir.
 func (s *ReadOnlySystem) Mkdir(name string, perm os.FileMode) error {
 	return os.ErrPermission
+}
+
+// PersistentState implements System.PersistentState.
+func (s *ReadOnlySystem) PersistentState() PersistentState {
+	return s.ps
 }
 
 // RawPath implements System.RawPath.
@@ -91,11 +88,6 @@ func (s *ReadOnlySystem) RunCmd(cmd *exec.Cmd) error {
 
 // RunScript implements System.RunScript.
 func (s *ReadOnlySystem) RunScript(scriptname, dir string, data []byte) error {
-	return os.ErrPermission
-}
-
-// Set implements System.Set.
-func (s *ReadOnlySystem) Set(bucket, key, value []byte) error {
 	return os.ErrPermission
 }
 

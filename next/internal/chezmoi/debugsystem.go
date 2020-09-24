@@ -13,13 +13,15 @@ import (
 // A DebugSystem wraps a System and logs all of the actions it executes.
 type DebugSystem struct {
 	s      System
+	ps     PersistentState
 	logger *log.Logger
 }
 
 // NewDebugSystem returns a new DebugSystem.
-func NewDebugSystem(s System, logger *log.Logger) *DebugSystem {
+func NewDebugSystem(system System, logger *log.Logger) *DebugSystem {
 	return &DebugSystem{
-		s:      s,
+		s:      system,
+		ps:     newDebugPersistentState(system.PersistentState(), logger),
 		logger: logger,
 	}
 }
@@ -29,24 +31,6 @@ func (s *DebugSystem) Chmod(name string, mode os.FileMode) error {
 	return s.debugf("Chmod(%q, 0o%o)", []interface{}{name, mode}, func() error {
 		return s.s.Chmod(name, mode)
 	})
-}
-
-// Delete implements System.Delete.
-func (s *DebugSystem) Delete(bucket, key []byte) error {
-	return s.debugf("Delete(%q, %q)", []interface{}{string(bucket), string(key)}, func() error {
-		return s.s.Delete(bucket, key)
-	})
-}
-
-// Get implements System.Get.
-func (s *DebugSystem) Get(bucket, key []byte) ([]byte, error) {
-	var value []byte
-	err := s.debugf("Get(%q, %q)", []interface{}{string(bucket), string(key)}, func() error {
-		var err error
-		value, err = s.s.Get(bucket, key)
-		return err
-	})
-	return value, err
 }
 
 // Glob implements System.Glob.
@@ -88,6 +72,11 @@ func (s *DebugSystem) Mkdir(name string, perm os.FileMode) error {
 	return s.debugf("Mkdir(%q, 0o%o)", []interface{}{name, perm}, func() error {
 		return s.s.Mkdir(name, perm)
 	})
+}
+
+// PersistentState implements System.PersistentState.
+func (s *DebugSystem) PersistentState() PersistentState {
+	return s.ps
 }
 
 // RawPath implements System.RawPath.
@@ -154,13 +143,6 @@ func (s *DebugSystem) RunCmd(cmd *exec.Cmd) error {
 func (s *DebugSystem) RunScript(scriptname, dir string, data []byte) error {
 	return s.debugf("Run(%q, %q, %s)", []interface{}{scriptname, dir, firstFewBytes(data)}, func() error {
 		return s.s.RunScript(scriptname, dir, data)
-	})
-}
-
-// Set implements System.Set.
-func (s *DebugSystem) Set(bucket, key, value []byte) error {
-	return s.debugf("Set(%q, %q, %q)", []interface{}{string(bucket), string(key), string(value)}, func() error {
-		return s.s.Set(bucket, key, value)
 	})
 }
 

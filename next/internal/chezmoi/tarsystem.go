@@ -12,6 +12,7 @@ import (
 // A TARSystem is a System that writes to a TAR archive.
 type TARSystem struct {
 	nullReaderSystem
+	ps             PersistentState
 	w              *tar.Writer
 	headerTemplate tar.Header
 }
@@ -20,6 +21,7 @@ type TARSystem struct {
 func NewTARSystem(w io.Writer, headerTemplate tar.Header) *TARSystem {
 	return &TARSystem{
 		w:              tar.NewWriter(w),
+		ps:             newReadOnlyPersistentState(nullPersistentState{}),
 		headerTemplate: headerTemplate,
 	}
 }
@@ -34,11 +36,6 @@ func (s *TARSystem) Close() error {
 	return s.w.Close()
 }
 
-// Delete implements System.Delete.
-func (s *TARSystem) Delete(bucket, key []byte) error {
-	return os.ErrPermission
-}
-
 // Mkdir implements System.Mkdir.
 func (s *TARSystem) Mkdir(name string, perm os.FileMode) error {
 	header := s.headerTemplate
@@ -46,6 +43,11 @@ func (s *TARSystem) Mkdir(name string, perm os.FileMode) error {
 	header.Name = name + "/"
 	header.Mode = int64(perm)
 	return s.w.WriteHeader(&header)
+}
+
+// PersistentState implements System.PersistentState.
+func (s *TARSystem) PersistentState() PersistentState {
+	return s.ps
 }
 
 // RemoveAll implements System.RemoveAll.
@@ -66,11 +68,6 @@ func (s *TARSystem) RunCmd(cmd *exec.Cmd) error {
 // RunScript implements System.RunScript.
 func (s *TARSystem) RunScript(scriptname, dir string, data []byte) error {
 	return s.WriteFile(scriptname, data, 0o700)
-}
-
-// Set implements System.Set.
-func (s *TARSystem) Set(bucket, key, value []byte) error {
-	return nil
 }
 
 // UnderlyingFS implements System.UnderlyingFS.

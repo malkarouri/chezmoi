@@ -125,7 +125,7 @@ func (c *Config) newRootCmd() (*cobra.Command, error) {
 		c.newPurgeCmd,
 		c.newRemoveCmd,
 		c.newSourcePathCmd,
-		// c.newStateCmd, // FIXME
+		c.newStateCmd,
 		// c.newStatusCmd, // FIXME
 		c.newUnmanagedCmd,
 		c.newUpdateCmd,

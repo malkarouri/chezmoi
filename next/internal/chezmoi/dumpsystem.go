@@ -19,6 +19,7 @@ const (
 // A DumpSystem is a System that writes to a data file.
 type DumpSystem struct {
 	nullReaderSystem
+	ps   nullPersistentState
 	data map[string]interface{}
 }
 
@@ -64,11 +65,6 @@ func (s *DumpSystem) Data() interface{} {
 	return s.data
 }
 
-// Delete implements System.Delete.
-func (s *DumpSystem) Delete(bucket, key []byte) error {
-	return os.ErrPermission
-}
-
 // Mkdir implements System.Mkdir.
 func (s *DumpSystem) Mkdir(dirname string, perm os.FileMode) error {
 	if _, exists := s.data[dirname]; exists {
@@ -80,6 +76,11 @@ func (s *DumpSystem) Mkdir(dirname string, perm os.FileMode) error {
 		Perm: perm,
 	}
 	return nil
+}
+
+// PersistentState implements System.PersistentState.
+func (s *DumpSystem) PersistentState() PersistentState {
+	return s.ps
 }
 
 // RemoveAll implements System.RemoveAll.
@@ -107,11 +108,6 @@ func (s *DumpSystem) RunScript(scriptname, dir string, data []byte) error {
 		Name:     scriptname,
 		Contents: string(data),
 	}
-	return nil
-}
-
-// Set implements System.Set.
-func (s *DumpSystem) Set(bucket, key, value []byte) error {
 	return nil
 }
 

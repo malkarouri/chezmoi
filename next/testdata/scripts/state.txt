@@ -1,0 +1,8 @@
+chezmoi state create
+exists ${CHEZMOICONFIGDIR}/chezmoistate.boltdb
+
+chezmoi state dump
+stdout scriptOnce
+
+chezmoi --force state reset
+! exists ${CHEZMOICONFIGDIR}/chezmoistate.boltdb

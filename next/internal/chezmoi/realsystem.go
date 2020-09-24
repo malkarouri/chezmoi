@@ -15,7 +15,7 @@ import (
 // An RealSystem is a System that writes to a filesystem and executes scripts.
 type RealSystem struct {
 	vfs.FS
-	PersistentState
+	ps           PersistentState
 	devCache     map[string]uint // devCache maps directories to device numbers.
 	tempDirCache map[uint]string // tempDirCache maps device numbers to renameio temporary directories.
 }
@@ -23,10 +23,10 @@ type RealSystem struct {
 // NewRealSystem returns a System that acts on fs.
 func NewRealSystem(fs vfs.FS, persistentState PersistentState) *RealSystem {
 	return &RealSystem{
-		FS:              fs,
-		PersistentState: persistentState,
-		devCache:        make(map[string]uint),
-		tempDirCache:    make(map[uint]string),
+		FS:           fs,
+		ps:           persistentState,
+		devCache:     make(map[string]uint),
+		tempDirCache: make(map[uint]string),
 	}
 }
 
@@ -51,6 +51,11 @@ func (s *RealSystem) IdempotentCmdOutput(cmd *exec.Cmd) ([]byte, error) {
 // PathSeparator implements doublestar.OS.PathSeparator.
 func (s *RealSystem) PathSeparator() rune {
 	return '/'
+}
+
+// PersistentState implements System.PersistentState.
+func (s *RealSystem) PersistentState() PersistentState {
+	return s.ps
 }
 
 // RunCmd implements System.RunCmd.

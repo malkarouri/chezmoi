@@ -2,6 +2,7 @@ package chezmoi
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
@@ -79,6 +80,22 @@ type unsupportedFileTypeError struct {
 
 func (e *unsupportedFileTypeError) Error() string {
 	return fmt.Sprintf("%s: unsupported file type %s", e.path, modeTypeName(e.mode))
+}
+
+// ScriptOnceData returns the script once data in b.
+func ScriptOnceData(s PersistentState) (interface{}, error) {
+	scriptOnceData := make(map[string]*scriptOnceState)
+	if err := s.ForEach(scriptOnceStateBucket, func(k, v []byte) error {
+		var s scriptOnceState
+		if err := json.Unmarshal(v, &s); err != nil {
+			return err
+		}
+		scriptOnceData[string(k)] = &s
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return scriptOnceData, nil
 }
 
 // isEmpty returns true if data is empty after trimming whitespace from both

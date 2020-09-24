@@ -11,13 +11,15 @@ import (
 // a wrapped System.
 type DryRunSystem struct {
 	s        System
+	ps       *dryRunPersistentState
 	modified bool
 }
 
 // NewDryRunSystem returns a new DryRunSystem that wraps fs.
 func NewDryRunSystem(s System) *DryRunSystem {
 	return &DryRunSystem{
-		s: s,
+		s:  s,
+		ps: newDryRunPersistentState(s.PersistentState()),
 	}
 }
 
@@ -31,11 +33,6 @@ func (s *DryRunSystem) Chmod(name string, mode os.FileMode) error {
 func (s *DryRunSystem) Delete(bucket, key []byte) error {
 	s.modified = true
 	return nil
-}
-
-// Get implements System.Get.
-func (s *DryRunSystem) Get(bucket, key []byte) ([]byte, error) {
-	return s.s.Get(bucket, key)
 }
 
 // Glob implements System.Glob.
@@ -62,7 +59,12 @@ func (s *DryRunSystem) Mkdir(name string, perm os.FileMode) error {
 // Modified returns true if a method that would have modified the wrapped system
 // has been called.
 func (s *DryRunSystem) Modified() bool {
-	return s.modified
+	return s.modified || s.ps.modified
+}
+
+// PersistentState implements System.PersistentState.
+func (s *DryRunSystem) PersistentState() PersistentState {
+	return s.ps
 }
 
 // RawPath implements System.RawPath.
@@ -105,12 +107,6 @@ func (s *DryRunSystem) RunCmd(cmd *exec.Cmd) error {
 
 // RunScript implements System.RunScript.
 func (s *DryRunSystem) RunScript(scriptname, dir string, data []byte) error {
-	s.modified = true
-	return nil
-}
-
-// Set implements System.Set.
-func (s *DryRunSystem) Set(bucket, key, value []byte) error {
 	s.modified = true
 	return nil
 }

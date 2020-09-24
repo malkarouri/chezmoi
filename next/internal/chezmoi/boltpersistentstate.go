@@ -26,7 +26,7 @@ func NewBoltPersistentState(fs vfs.FS, path string, options *bbolt.Options) (*Bo
 	_, err := fs.Stat(b.path)
 	switch {
 	case err == nil:
-		if err := b.openDB(); err != nil {
+		if err := b.OpenOrCreate(); err != nil {
 			return nil, err
 		}
 	case os.IsNotExist(err):
@@ -86,24 +86,22 @@ func (b *BoltPersistentState) Get(bucket, key []byte) ([]byte, error) {
 	return value, nil
 }
 
-// Set sets the value associated with key in bucket. bucket will be created if
-// it does not already exist.
-func (b *BoltPersistentState) Set(bucket, key, value []byte) error {
+// ForEach calls fn for each key, value pair in bucket.
+func (b *BoltPersistentState) ForEach(bucket []byte, fn func(k, v []byte) error) error {
 	if b.db == nil {
-		if err := b.openDB(); err != nil {
-			return err
-		}
+		return nil
 	}
-	return b.db.Update(func(tx *bbolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists(bucket)
-		if err != nil {
-			return err
+	return b.db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket(bucket)
+		if b == nil {
+			return nil
 		}
-		return b.Put(key, value)
+		return b.ForEach(fn)
 	})
 }
 
-func (b *BoltPersistentState) openDB() error {
+// OpenOrCreate opens b, creating it if needed.
+func (b *BoltPersistentState) OpenOrCreate() error {
 	if err := vfs.MkdirAll(b.fs, filepath.Dir(b.path), 0o777); err != nil {
 		return err
 	}
@@ -118,4 +116,21 @@ func (b *BoltPersistentState) openDB() error {
 	}
 	b.db = db
 	return err
+}
+
+// Set sets the value associated with key in bucket. bucket will be created if
+// it does not already exist.
+func (b *BoltPersistentState) Set(bucket, key, value []byte) error {
+	if b.db == nil {
+		if err := b.OpenOrCreate(); err != nil {
+			return err
+		}
+	}
+	return b.db.Update(func(tx *bbolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(bucket)
+		if err != nil {
+			return err
+		}
+		return b.Put(key, value)
+	})
 }
