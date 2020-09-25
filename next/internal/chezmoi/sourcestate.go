@@ -827,6 +827,7 @@ func (s *SourceState) sortedTargetNames() []string {
 }
 
 func (s *SourceState) sourceStateEntry(system System, destPath string, info os.FileInfo, parentDir string, options *AddOptions) (SourceStateEntry, error) {
+	// FIXME IAMHERE need to generate EntryState and update status if needed
 	destStateEntry, err := NewDestStateEntry(system, destPath)
 	if err != nil {
 		return nil, err
