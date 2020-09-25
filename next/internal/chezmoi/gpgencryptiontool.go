@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 
 	"go.uber.org/multierr"
 )
@@ -75,7 +76,7 @@ func (t *GPGEncryptionTool) Encrypt(plaintext []byte) (ciphertext []byte, err er
 		err = multierr.Append(err, os.RemoveAll(tempFile.Name()))
 	}()
 
-	if UNIXFileModes {
+	if runtime.GOOS != "windows" {
 		if err = tempFile.Chmod(0o600); err != nil {
 			return
 		}

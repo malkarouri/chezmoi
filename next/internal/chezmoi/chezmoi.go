@@ -5,14 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"runtime"
 	"strings"
-)
-
-// Configuration constants.
-const (
-	UNIXFileModes = runtime.GOOS != "windows"
-	ignorePrefix  = "."
 )
 
 // Configuration variables.
@@ -28,6 +21,7 @@ var (
 
 // Suffixes and prefixes.
 const (
+	ignorePrefix     = "."
 	dotPrefix        = "dot_"
 	emptyPrefix      = "empty_"
 	encryptedPrefix  = "encrypted_"

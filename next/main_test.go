@@ -98,7 +98,7 @@ func cmdCmpMod(ts *testscript.TestScript, neg bool, args []string) {
 	if err != nil || os.FileMode(mode64).Perm() != os.FileMode(mode64) {
 		ts.Fatalf("invalid mode: %s", args[0])
 	}
-	if !chezmoi.UNIXFileModes {
+	if runtime.GOOS == "windows" {
 		return
 	}
 	info, err := os.Stat(args[1])

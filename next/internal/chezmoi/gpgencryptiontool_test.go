@@ -6,6 +6,7 @@ package chezmoi
 import (
 	"io/ioutil"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,7 +24,7 @@ func TestGPGEncryptionTool(t *testing.T) {
 		assert.NoError(t, os.RemoveAll(tempDir))
 	}()
 
-	if UNIXFileModes {
+	if runtime.GOOS != "windows" {
 		require.NoError(t, os.Chmod(tempDir, 0o700))
 	}
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 	"sort"
 	"strings"
 	"text/template"
@@ -806,7 +807,7 @@ func (s *SourceState) sourceStateEntry(system System, destPath string, info os.F
 		attributes := DirAttributes{
 			Name:    info.Name(),
 			Exact:   options.Exact,
-			Private: UNIXFileModes && info.Mode().Perm()&0o77 == 0,
+			Private: runtime.GOOS != "windows" && info.Mode().Perm()&0o77 == 0,
 		}
 		return &SourceStateDir{
 			path:       path.Join(parentDir, attributes.BaseName()),
@@ -821,8 +822,8 @@ func (s *SourceState) sourceStateEntry(system System, destPath string, info os.F
 			Type:       SourceFileTypeFile,
 			Empty:      options.Empty,
 			Encrypted:  options.Encrypt,
-			Executable: UNIXFileModes && info.Mode().Perm()&0o111 != 0,
-			Private:    UNIXFileModes && info.Mode().Perm()&0o77 == 0,
+			Executable: runtime.GOOS != "windows" && info.Mode().Perm()&0o111 != 0,
+			Private:    runtime.GOOS != "windows" && info.Mode().Perm()&0o77 == 0,
 			Template:   options.Template || options.AutoTemplate,
 		}
 		contents, err := destStateEntry.Contents()

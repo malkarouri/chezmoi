@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -122,7 +123,7 @@ func testEncryptionToolEncryptFile(t *testing.T, et EncryptionTool) {
 		defer func() {
 			assert.NoError(t, os.RemoveAll(tempFile.Name()))
 		}()
-		if UNIXFileModes {
+		if runtime.GOOS != "windows" {
 			require.NoError(t, tempFile.Chmod(0o600))
 		}
 		_, err = tempFile.Write(expectedPlaintext)
