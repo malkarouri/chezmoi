@@ -1,12 +1,30 @@
 package chezmoi
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/twpayne/go-vfs/vfst"
 )
+
+func TestEntryStateMarshal(t *testing.T) {
+	es := EntryState{
+		Mode:           os.ModeSymlink,
+		ContentsSHA256: []byte{0, 1, 2, 3},
+	}
+	jsonBytes := []byte(`{"mode":134217728,"contentsSHA256":"00010203"}`)
+
+	actualJSONBytes, err := json.Marshal(es)
+	require.NoError(t, err)
+	assert.Equal(t, jsonBytes, actualJSONBytes)
+
+	var actualEntryState EntryState
+	require.NoError(t, json.Unmarshal(jsonBytes, &actualEntryState))
+	assert.Equal(t, es, actualEntryState)
+}
 
 func TestTargetStateEntryApplyAndEqual(t *testing.T) {
 	for _, tc1 := range []struct {

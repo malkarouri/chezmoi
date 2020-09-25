@@ -3,6 +3,7 @@ package chezmoi
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -130,6 +131,7 @@ type AddOptions struct {
 	Encrypt      bool
 	Exact        bool
 	Include      *IncludeSet
+	UpdateState  bool
 	Template     bool
 	umask        os.FileMode
 }
@@ -197,7 +199,10 @@ func (s *SourceState) Add(sourceSystem System, destPathInfos map[string]os.FileI
 	targetSourceState := &SourceState{
 		entries: newSourceStateEntries,
 	}
-	return targetSourceState.ApplyAll(sourceSystem, s.sourceDir, options.Include, options.umask)
+	return targetSourceState.ApplyAll(sourceSystem, s.sourceDir, ApplyOptions{
+		Include: options.Include,
+		Umask:   options.umask,
+	})
 }
 
 // AddDestPathInfos adds an os.FileInfo to destPathInfos for destPath and any of
@@ -245,10 +250,17 @@ func (s *SourceState) AddDestPathInfos(destPathInfos map[string]os.FileInfo, lst
 	}
 }
 
+// ApplyOptions are options to SourceState.ApplyAll and SourceState.ApplyOne.
+type ApplyOptions struct {
+	Include     *IncludeSet
+	Umask       os.FileMode
+	UpdateState bool
+}
+
 // ApplyAll updates targetDir in fs to match s.
-func (s *SourceState) ApplyAll(targetSystem System, targetDir string, include *IncludeSet, umask os.FileMode) error {
+func (s *SourceState) ApplyAll(targetSystem System, targetDir string, options ApplyOptions) error {
 	for _, targetName := range s.sortedTargetNames() {
-		if err := s.ApplyOne(targetSystem, targetDir, targetName, include, umask); err != nil {
+		if err := s.ApplyOne(targetSystem, targetDir, targetName, options); err != nil {
 			return err
 		}
 	}
@@ -256,13 +268,13 @@ func (s *SourceState) ApplyAll(targetSystem System, targetDir string, include *I
 }
 
 // ApplyOne updates targetName in targetDir on fs to match s using s.
-func (s *SourceState) ApplyOne(targetSystem System, targetDir, targetName string, include *IncludeSet, umask os.FileMode) error {
+func (s *SourceState) ApplyOne(targetSystem System, targetDir, targetName string, options ApplyOptions) error {
 	targetStateEntry, err := s.entries[targetName].TargetStateEntry()
 	if err != nil {
 		return err
 	}
 
-	if !include.IncludeTargetStateEntry(targetStateEntry) {
+	if options.Include != nil && !options.Include.IncludeTargetStateEntry(targetStateEntry) {
 		return nil
 	}
 
@@ -272,7 +284,26 @@ func (s *SourceState) ApplyOne(targetSystem System, targetDir, targetName string
 		return err
 	}
 
-	return targetStateEntry.Apply(targetSystem, destStateEntry, umask)
+	if err := targetStateEntry.Apply(targetSystem, destStateEntry, options.Umask); err != nil {
+		return err
+	}
+
+	if !options.UpdateState {
+		return nil
+	}
+
+	entryState, err := targetStateEntry.EntryState()
+	if err != nil {
+		return err
+	}
+	if entryState == nil {
+		return nil
+	}
+	data, err := json.Marshal(entryState)
+	if err != nil {
+		return err
+	}
+	return targetSystem.PersistentState().Set(entryStateBucket, []byte(targetPath), data)
 }
 
 // Entries returns s's source state entries.

@@ -295,8 +295,13 @@ func (c *Config) applyArgs(targetSystem chezmoi.System, targetDir string, args [
 		return err
 	}
 
+	applyOptions := chezmoi.ApplyOptions{
+		Include: include,
+		Umask:   umask,
+	}
+
 	if len(args) == 0 {
-		return s.ApplyAll(targetSystem, targetDir, include, umask)
+		return s.ApplyAll(targetSystem, targetDir, applyOptions)
 	}
 
 	targetNames, err := c.getTargetNames(s, args, getTargetNamesOptions{
@@ -308,7 +313,7 @@ func (c *Config) applyArgs(targetSystem chezmoi.System, targetDir string, args [
 	}
 
 	for _, targetName := range targetNames {
-		if err := s.ApplyOne(targetSystem, targetDir, targetName, include, umask); err != nil {
+		if err := s.ApplyOne(targetSystem, targetDir, targetName, applyOptions); err != nil {
 			return err
 		}
 	}

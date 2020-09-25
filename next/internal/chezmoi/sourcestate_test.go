@@ -461,7 +461,9 @@ func TestSourceStateApplyAll(t *testing.T) {
 			s := NewSourceState(sourceStateOptions...)
 			require.NoError(t, s.Read())
 			require.NoError(t, s.Evaluate())
-			require.NoError(t, s.ApplyAll(system, "/home/user", NewIncludeSet(IncludeAll), Umask))
+			require.NoError(t, s.ApplyAll(system, "/home/user", ApplyOptions{
+				Umask: Umask,
+			}))
 
 			vfst.RunTests(t, fs, "", tc.tests...)
 		})

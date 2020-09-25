@@ -53,7 +53,7 @@ func (s *DryRunSystem) Mkdir(name string, perm os.FileMode) error {
 // Modified returns true if a method that would have modified the wrapped system
 // has been called.
 func (s *DryRunSystem) Modified() bool {
-	return s.modified || s.ps.modified
+	return s.modified
 }
 
 // PersistentState implements System.PersistentState.

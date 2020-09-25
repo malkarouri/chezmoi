@@ -43,7 +43,7 @@ func TestTARSystem(t *testing.T) {
 
 	b := &bytes.Buffer{}
 	tarSystem := NewTARSystem(b, tar.Header{})
-	require.NoError(t, s.ApplyAll(tarSystem, "", NewIncludeSet(IncludeAll), 0))
+	require.NoError(t, s.ApplyAll(tarSystem, "", ApplyOptions{}))
 
 	r := tar.NewReader(b)
 	for _, tc := range []struct {

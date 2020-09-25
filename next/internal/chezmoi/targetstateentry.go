@@ -11,10 +11,18 @@ import (
 	"time"
 )
 
+// An EntryState represents the state of an entry.
+type EntryState struct {
+	// Type // FIXME
+	Mode           os.FileMode `json:"mode" toml:"mode" yaml:"mode"`
+	ContentsSHA256 hexBytes    `json:"contentsSHA256,omitempty" toml:"contentsSHA256" yaml:"contentsSHA256"`
+}
+
 // A TargetStateEntry represents the state of an entry in the target state.
 type TargetStateEntry interface {
 	Apply(s System, destStateEntry DestStateEntry, umask os.FileMode) error
 	Equal(destStateEntry DestStateEntry, umask os.FileMode) (bool, error)
+	EntryState() (*EntryState, error)
 	Evaluate() error
 }
 
@@ -63,6 +71,11 @@ type scriptOnceState struct {
 	ExecutedAt time.Time `json:"executedAt" toml:"executedAt" yaml:"executedAt"` // FIXME should be runAt?
 }
 
+// Equal returns true if es is equal to other.
+func (es *EntryState) Equal(other *EntryState) bool {
+	return es.Mode == other.Mode && bytes.Equal(es.ContentsSHA256, other.ContentsSHA256)
+}
+
 // Apply updates destStateEntry to match t.
 func (t *TargetStateAbsent) Apply(s System, destStateEntry DestStateEntry, umask os.FileMode) error {
 	if _, ok := destStateEntry.(*DestStateAbsent); ok {
@@ -78,6 +91,11 @@ func (t *TargetStateAbsent) Equal(destStateEntry DestStateEntry, umask os.FileMo
 		return false, nil
 	}
 	return ok, nil
+}
+
+// EntryState returns t's entry state.
+func (t *TargetStateAbsent) EntryState() (*EntryState, error) {
+	return nil, nil // FIXME.
 }
 
 // Evaluate evaluates t.
@@ -109,6 +127,13 @@ func (t *TargetStateDir) Equal(destStateEntry DestStateEntry, umask os.FileMode)
 		return false, nil
 	}
 	return true, nil
+}
+
+// EntryState returns t's entry state.
+func (t *TargetStateDir) EntryState() (*EntryState, error) {
+	return &EntryState{
+		Mode: os.ModeDir | t.perm,
+	}, nil
 }
 
 // Evaluate evaluates t.
@@ -144,6 +169,18 @@ func (t *TargetStateFile) Apply(s System, destStateEntry DestStateEntry, umask o
 		return err
 	}
 	return s.WriteFile(destStateEntry.Path(), contents, t.perm)
+}
+
+// EntryState returns t's entry state.
+func (t *TargetStateFile) EntryState() (*EntryState, error) {
+	contentsSHA256, err := t.ContentsSHA256()
+	if err != nil {
+		return nil, err
+	}
+	return &EntryState{
+		Mode:           t.perm,
+		ContentsSHA256: hexBytes(contentsSHA256),
+	}, nil
 }
 
 // Equal returns true if destStateEntry matches t.
@@ -192,6 +229,11 @@ func (t *TargetStatePresent) Apply(s System, destStateEntry DestStateEntry, umas
 	return s.WriteFile(destStateEntry.Path(), contents, t.perm)
 }
 
+// EntryState returns t's entry state.
+func (t *TargetStatePresent) EntryState() (*EntryState, error) {
+	return nil, nil
+}
+
 // Equal returns true if destStateEntry matches t.
 func (t *TargetStatePresent) Equal(destStateEntry DestStateEntry, umask os.FileMode) (bool, error) {
 	destStateFile, ok := destStateEntry.(*DestStateFile)
@@ -219,6 +261,11 @@ func (t *TargetStateRenameDir) Apply(s System, destStateEntry DestStateEntry, um
 // Equal returns false because destStateEntry has not been renamed.
 func (t *TargetStateRenameDir) Equal(destStateEntry DestStateEntry, umask os.FileMode) (bool, error) {
 	return false, nil
+}
+
+// EntryState returns t's entry state.
+func (t *TargetStateRenameDir) EntryState() (*EntryState, error) {
+	return nil, nil
 }
 
 // Evaluate does nothing.
@@ -275,6 +322,11 @@ func (t *TargetStateScript) Apply(s System, destStateEntry DestStateEntry, umask
 	return nil
 }
 
+// EntryState returns t's entry state.
+func (t *TargetStateScript) EntryState() (*EntryState, error) {
+	return nil, nil // FIXME
+}
+
 // Equal returns true if destStateEntry matches t.
 func (t *TargetStateScript) Equal(destStateEntry DestStateEntry, umask os.FileMode) (bool, error) {
 	// Scripts are independent of the destination state.
@@ -311,6 +363,18 @@ func (t *TargetStateSymlink) Apply(s System, destStateEntry DestStateEntry, umas
 		return err
 	}
 	return s.WriteSymlink(linkname, destStateEntry.Path())
+}
+
+// EntryState returns t's entry state.
+func (t *TargetStateSymlink) EntryState() (*EntryState, error) {
+	linknameSHA256, err := t.LinknameSHA256()
+	if err != nil {
+		return nil, err
+	}
+	return &EntryState{
+		Mode:           os.ModeSymlink,
+		ContentsSHA256: linknameSHA256,
+	}, nil
 }
 
 // Equal returns true if destStateEntry matches t.

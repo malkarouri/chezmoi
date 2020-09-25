@@ -18,9 +18,10 @@ type linknameFunc func() (string, error)
 
 // A lazyLinkname evaluates its linkname lazily.
 type lazyLinkname struct {
-	linknameFunc linknameFunc
-	linkname     string
-	linknameErr  error
+	linknameFunc   linknameFunc
+	linkname       string
+	linknameErr    error
+	linknameSHA256 []byte
 }
 
 // newLazyContents returns a new lazyContents with contents.
@@ -30,7 +31,7 @@ func newLazyContents(contents []byte) *lazyContents {
 	}
 }
 
-// Contents returns e's contents.
+// Contents returns lc's contents.
 func (lc *lazyContents) Contents() ([]byte, error) {
 	if lc == nil {
 		return nil, nil
@@ -45,7 +46,7 @@ func (lc *lazyContents) Contents() ([]byte, error) {
 	return lc.contents, lc.contentsErr
 }
 
-// ContentsSHA256 returns the SHA256 sum of f's contents.
+// ContentsSHA256 returns the SHA256 sum of lc's contents.
 func (lc *lazyContents) ContentsSHA256() ([]byte, error) {
 	if lc == nil {
 		return sha256Sum(nil), nil
@@ -77,6 +78,21 @@ func (ll *lazyLinkname) Linkname() (string, error) {
 		ll.linknameFunc = nil
 	}
 	return ll.linkname, ll.linknameErr
+}
+
+// LinknameSHA256 returns the SHA256 sum of ll's linkname.
+func (ll *lazyLinkname) LinknameSHA256() ([]byte, error) {
+	if ll == nil {
+		return sha256Sum(nil), nil
+	}
+	if ll.linknameSHA256 == nil {
+		linkname, err := ll.Linkname()
+		if err != nil {
+			return nil, err
+		}
+		ll.linknameSHA256 = sha256Sum([]byte(linkname))
+	}
+	return ll.linknameSHA256, nil
 }
 
 func sha256Sum(data []byte) []byte {

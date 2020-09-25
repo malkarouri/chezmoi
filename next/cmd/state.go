@@ -10,6 +10,7 @@ import (
 )
 
 type persistentStateData struct {
+	EntryState interface{} `json:"entryState" toml:"entryState" yaml:"entryState"`
 	ScriptOnce interface{} `json:"scriptOnce" toml:"scriptOnce" yaml:"scriptOnce"`
 }
 
@@ -59,11 +60,17 @@ func (c *Config) runStateCreateCmd(cmd *cobra.Command, args []string) error {
 }
 
 func (c *Config) runStateDataCmd(cmd *cobra.Command, args []string) error {
-	scriptOnceData, err := chezmoi.ScriptOnceData(c.baseSystem.PersistentState())
+	persistentState := c.baseSystem.PersistentState()
+	entryStateData, err := chezmoi.EntryStateData(persistentState)
+	if err != nil {
+		return err
+	}
+	scriptOnceData, err := chezmoi.ScriptOnceData(persistentState)
 	if err != nil {
 		return err
 	}
 	return c.marshal(&persistentStateData{
+		EntryState: entryStateData,
 		ScriptOnce: scriptOnceData,
 	})
 }

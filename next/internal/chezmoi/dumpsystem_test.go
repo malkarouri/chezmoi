@@ -38,7 +38,7 @@ func TestDumpSystem(t *testing.T) {
 	require.NoError(t, s.Evaluate())
 
 	dumpSystem := NewDumpSystem()
-	require.NoError(t, s.ApplyAll(dumpSystem, "", NewIncludeSet(IncludeAll), 0))
+	require.NoError(t, s.ApplyAll(dumpSystem, "", ApplyOptions{}))
 	expectedData := map[string]interface{}{
 		"dir": &dirData{
 			Type: dataTypeDir,

@@ -16,6 +16,7 @@ var (
 	// Umask is the user's umask.
 	Umask = os.ModePerm
 
+	entryStateBucket      = []byte("entryState")
 	scriptOnceStateBucket = []byte("script") // FIXME scriptOnce
 )
 
@@ -76,7 +77,25 @@ func (e *unsupportedFileTypeError) Error() string {
 	return fmt.Sprintf("%s: unsupported file type %s", e.path, modeTypeName(e.mode))
 }
 
-// ScriptOnceData returns the script once data in b.
+// FIXME merge the following two functions
+
+// EntryStateData returns the entry state data in s.
+func EntryStateData(s PersistentState) (interface{}, error) {
+	entryStateData := make(map[string]*EntryState)
+	if err := s.ForEach(entryStateBucket, func(k, v []byte) error {
+		var es EntryState
+		if err := json.Unmarshal(v, &s); err != nil {
+			return err
+		}
+		entryStateData[string(k)] = &es
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return entryStateData, nil
+}
+
+// ScriptOnceData returns the script once data in s.
 func ScriptOnceData(s PersistentState) (interface{}, error) {
 	scriptOnceData := make(map[string]*scriptOnceState)
 	if err := s.ForEach(scriptOnceStateBucket, func(k, v []byte) error {

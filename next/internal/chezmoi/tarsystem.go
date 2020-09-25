@@ -21,7 +21,7 @@ type TARSystem struct {
 func NewTARSystem(w io.Writer, headerTemplate tar.Header) *TARSystem {
 	return &TARSystem{
 		w:              tar.NewWriter(w),
-		ps:             newReadOnlyPersistentState(nullPersistentState{}),
+		ps:             nullPersistentState{},
 		headerTemplate: headerTemplate,
 	}
 }
