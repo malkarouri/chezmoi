@@ -15,10 +15,10 @@ type updateCmdConfig struct {
 func (c *Config) newUpdateCmd() *cobra.Command {
 	updateCmd := &cobra.Command{
 		Use:     "update",
-		Args:    cobra.NoArgs,
 		Short:   "Pull and apply any changes",
 		Long:    mustGetLongHelp("update"),
 		Example: getExample("update"),
+		Args:    cobra.NoArgs,
 		RunE:    c.runUpdateCmd,
 		Annotations: map[string]string{
 			modifiesDestinationDirectory: "true",

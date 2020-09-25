@@ -13,10 +13,10 @@ import (
 func (c *Config) newUnmanagedCmd() *cobra.Command {
 	unmanagedCmd := &cobra.Command{
 		Use:     "unmanaged",
-		Args:    cobra.NoArgs,
 		Short:   "List the unmanaged files in the destination directory",
 		Long:    mustGetLongHelp("unmanaged"),
 		Example: getExample("unmanaged"),
+		Args:    cobra.NoArgs,
 		RunE:    c.makeRunEWithSourceState(c.runUnmanagedCmd),
 	}
 	return unmanagedCmd

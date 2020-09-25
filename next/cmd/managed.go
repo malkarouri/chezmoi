@@ -18,10 +18,10 @@ type managedCmdConfig struct {
 func (c *Config) newManagedCmd() *cobra.Command {
 	managedCmd := &cobra.Command{
 		Use:     "managed",
-		Args:    cobra.NoArgs,
 		Short:   "List the managed entries in the destination directory",
 		Long:    mustGetLongHelp("managed"),
 		Example: getExample("managed"),
+		Args:    cobra.NoArgs,
 		RunE:    c.makeRunEWithSourceState(c.runManagedCmd),
 	}
 

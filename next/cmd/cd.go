@@ -13,11 +13,11 @@ type cdCmdConfig struct {
 func (c *Config) newCDCmd() *cobra.Command {
 	cdCmd := &cobra.Command{
 		Use:     "cd",
-		Args:    cobra.NoArgs,
 		Short:   "Launch a shell in the source directory",
 		Long:    mustGetLongHelp("cd"),
 		Example: getExample("cd"),
 		RunE:    c.runCDCmd,
+		Args:    cobra.NoArgs,
 		Annotations: map[string]string{
 			doesNotRequireValidConfig: "true",
 			requiresSourceDirectory:   "true",

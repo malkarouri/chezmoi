@@ -12,10 +12,10 @@ import (
 func (c *Config) newCatCmd() *cobra.Command {
 	catCmd := &cobra.Command{
 		Use:     "cat targets...",
-		Args:    cobra.MinimumNArgs(1),
 		Short:   "Print the target contents of a file or symlink",
 		Long:    mustGetLongHelp("cat"),
 		Example: getExample("cat"),
+		Args:    cobra.MinimumNArgs(1),
 		RunE:    c.makeRunEWithSourceState(c.runCatCmd),
 	}
 

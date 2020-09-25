@@ -43,10 +43,10 @@ type attributesModifier struct {
 func (c *Config) newChattrCmd() *cobra.Command {
 	chattrCmd := &cobra.Command{
 		Use:     "chattr attributes targets...",
-		Args:    cobra.MinimumNArgs(2),
 		Short:   "Change the attributes of a target in the source state",
 		Long:    mustGetLongHelp("chattr"),
 		Example: getExample("chattr"),
+		Args:    cobra.MinimumNArgs(2),
 		RunE:    c.makeRunEWithSourceState(c.runChattrCmd),
 		Annotations: map[string]string{
 			modifiesSourceDirectory: "true",

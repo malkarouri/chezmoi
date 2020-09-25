@@ -14,8 +14,8 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 	completionCmd := &cobra.Command{
 		Use:   "completion",
 		Short: "Generate shell completion code",
-		// Long:      mustGetLongHelp("completion"),
-		// Example:   getExample("completion"),
+		// Long:      mustGetLongHelp("completion"), // FIXME
+		// Example:   getExample("completion"), // FIXME
 	}
 
 	makeRunE := func(genCompletionFunc func(io.Writer) error) func(*cobra.Command, []string) error {
@@ -30,9 +30,11 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 
 	bashCmd := &cobra.Command{
 		Use:   "bash",
-		Args:  cobra.NoArgs,
 		Short: "Generate bash completion code",
-		RunE:  makeRunE(rootCmd.GenBashCompletion),
+		// Long:      mustGetLongHelp("completion", "bash"), // FIXME
+		// Example:   getExample("completion", "bash"), // FIXME
+		RunE: makeRunE(rootCmd.GenBashCompletion),
+		Args: cobra.NoArgs,
 		Annotations: map[string]string{
 			doesNotRequireValidConfig: "true",
 		},
@@ -43,6 +45,8 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 		Use:   "fish",
 		Args:  cobra.NoArgs,
 		Short: "Generate fish completion code",
+		// Long:      mustGetLongHelp("completion", "fish"), // FIXME
+		// Example:   getExample("completion", "fish"), // FIXME
 		RunE: makeRunE(func(w io.Writer) error {
 			return rootCmd.GenFishCompletion(w, true)
 		}),
@@ -56,7 +60,9 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 		Use:   "powershell",
 		Args:  cobra.NoArgs,
 		Short: "Generate PowerShell completion code",
-		RunE:  makeRunE(rootCmd.GenPowerShellCompletion),
+		// Long:      mustGetLongHelp("completion", "powershell"), // FIXME
+		// Example:   getExample("completion", "powershell"), // FIXME
+		RunE: makeRunE(rootCmd.GenPowerShellCompletion),
 		Annotations: map[string]string{
 			doesNotRequireValidConfig: "true",
 		},
@@ -67,7 +73,9 @@ func (c *Config) newCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 		Use:   "zsh",
 		Args:  cobra.NoArgs,
 		Short: "Generate zsh completion code",
-		RunE:  makeRunE(rootCmd.GenZshCompletion),
+		// Long:      mustGetLongHelp("completion", "zsh"), // FIXME
+		// Example:   getExample("completion", "zsh"), // FIXME
+		RunE: makeRunE(rootCmd.GenZshCompletion),
 		Annotations: map[string]string{
 			doesNotRequireValidConfig: "true",
 		},

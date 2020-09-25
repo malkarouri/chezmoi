@@ -11,10 +11,10 @@ import (
 func (c *Config) newPurgeCmd() *cobra.Command {
 	purgeCmd := &cobra.Command{
 		Use:     "purge",
-		Args:    cobra.NoArgs,
 		Short:   "Purge all of chezmoi's configuration and data",
 		Long:    mustGetLongHelp("purge"),
 		Example: getExample("purge"),
+		Args:    cobra.NoArgs,
 		RunE:    c.runPurgeCmd,
 		Annotations: map[string]string{
 			modifiesSourceDirectory: "true",

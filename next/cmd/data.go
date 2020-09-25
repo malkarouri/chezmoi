@@ -9,10 +9,10 @@ import (
 func (c *Config) newDataCmd() *cobra.Command {
 	dataCmd := &cobra.Command{
 		Use:     "data",
-		Args:    cobra.NoArgs,
 		Short:   "Print the template data",
 		Long:    mustGetLongHelp("data"),
 		Example: getExample("data"),
+		Args:    cobra.NoArgs,
 		RunE:    c.makeRunEWithSourceState(c.runDataCmd),
 	}
 	return dataCmd

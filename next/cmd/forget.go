@@ -12,10 +12,10 @@ func (c *Config) newForgetCmd() *cobra.Command {
 	forgetCmd := &cobra.Command{
 		Use:     "forget targets...",
 		Aliases: []string{"unmanage"},
-		Args:    cobra.MinimumNArgs(1),
 		Short:   "Remove a target from the source state",
 		Long:    mustGetLongHelp("forget"),
 		Example: getExample("forget"),
+		Args:    cobra.MinimumNArgs(1),
 		RunE:    c.makeRunEWithSourceState(c.runForgetCmd),
 		Annotations: map[string]string{
 			modifiesSourceDirectory: "true",

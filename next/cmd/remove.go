@@ -14,10 +14,10 @@ func (c *Config) newRemoveCmd() *cobra.Command {
 	removeCmd := &cobra.Command{
 		Use:     "remove targets...",
 		Aliases: []string{"rm"},
-		Args:    cobra.MinimumNArgs(1),
 		Short:   "Remove a target from the source state and the destination directory",
 		Long:    mustGetLongHelp("remove"),
 		Example: getExample("remove"),
+		Args:    cobra.MinimumNArgs(1),
 		RunE:    c.makeRunEWithSourceState(c.runRemoveCmd),
 		Annotations: map[string]string{
 			modifiesDestinationDirectory: "true",

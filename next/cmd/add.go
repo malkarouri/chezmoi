@@ -20,10 +20,10 @@ func (c *Config) newAddCmd() *cobra.Command {
 	addCmd := &cobra.Command{
 		Use:     "add targets...",
 		Aliases: []string{"manage"},
-		Args:    cobra.MinimumNArgs(1),
 		Short:   "Add an existing file, directory, or symlink to the source state",
 		Long:    mustGetLongHelp("add"),
 		Example: getExample("add"),
+		Args:    cobra.MinimumNArgs(1),
 		RunE:    c.makeRunEWithSourceState(c.runAddCmd),
 		Annotations: map[string]string{
 			modifiesSourceDirectory: "true",

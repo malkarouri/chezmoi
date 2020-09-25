@@ -102,8 +102,8 @@ func (c *Config) newRootCmd() (*cobra.Command, error) {
 		}
 	})
 
-	rootCmd.AddCommand(c.newCompletionCmd(rootCmd))
 	rootCmd.SetHelpCommand(c.newHelpCmd(rootCmd))
+	rootCmd.AddCommand(c.newCompletionCmd(rootCmd))
 	for _, newCmdFunc := range []func() *cobra.Command{
 		c.newAddCmd,
 		c.newApplyCmd,

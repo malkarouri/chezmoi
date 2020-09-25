@@ -16,10 +16,10 @@ import (
 func (c *Config) newDocsCmd() *cobra.Command {
 	docsCmd := &cobra.Command{
 		Use:     "docs [regexp]",
-		Args:    cobra.MaximumNArgs(1),
 		Short:   "Print documentation",
 		Long:    mustGetLongHelp("docs"),
 		Example: getExample("docs"),
+		Args:    cobra.MaximumNArgs(1),
 		RunE:    c.runDocsCmd,
 		Annotations: map[string]string{
 			doesNotRequireValidConfig: "true",
