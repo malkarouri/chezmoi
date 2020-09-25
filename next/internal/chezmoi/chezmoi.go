@@ -16,7 +16,7 @@ var (
 	// Umask is the user's umask.
 	Umask = os.ModePerm
 
-	scriptOnceStateBucket = []byte("script")
+	scriptOnceStateBucket = []byte("script") // FIXME scriptOnce
 )
 
 // Suffixes and prefixes.
