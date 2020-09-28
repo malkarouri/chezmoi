@@ -165,7 +165,11 @@ func (s *SourceState) Add(sourceSystem System, destPathInfos map[string]os.FileI
 			return fmt.Errorf("%s: parent directory not in source state", destPath)
 		}
 
-		newSourceStateEntry, err := s.sourceStateEntry(sourceSystem, destPath, destPathInfo, parentDir, options)
+		destStateEntry, err := NewDestStateEntry(sourceSystem, destPath)
+		if err != nil {
+			return err
+		}
+		newSourceStateEntry, err := s.sourceStateEntry(destStateEntry, destPath, destPathInfo, parentDir, options)
 		if err != nil {
 			return err
 		}
@@ -826,12 +830,8 @@ func (s *SourceState) sortedTargetNames() []string {
 	return targetNames
 }
 
-func (s *SourceState) sourceStateEntry(system System, destPath string, info os.FileInfo, parentDir string, options *AddOptions) (SourceStateEntry, error) {
+func (s *SourceState) sourceStateEntry(destStateEntry DestStateEntry, destPath string, info os.FileInfo, parentDir string, options *AddOptions) (SourceStateEntry, error) {
 	// FIXME IAMHERE need to generate EntryState and update status if needed
-	destStateEntry, err := NewDestStateEntry(system, destPath)
-	if err != nil {
-		return nil, err
-	}
 	switch destStateEntry := destStateEntry.(type) {
 	case *DestStateAbsent:
 		return nil, fmt.Errorf("%s: not found", destPath)
